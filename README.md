@@ -8,9 +8,9 @@ The advent of single-cell sequencing has revolutionized the study of cellular dy
 ## Key Capabilities of DeepExonas:
 
 - Exon-Level Quantification: It represents genes as graphs, where nodes are exons and edges are junction reads, capturing detailed transcriptomic information at the exon level.
-- Better Cell Embedding: The integration of exon and junction read data leads to improved cell clustering accuracy compared to gene-count based methods.
+- Better Cell Embedding: DeepExonas leverages exon and junction read data to significantly improve the accuracy of cell embeddings, providing better resolution and resulting in more precise, biologically meaningful cell clusters compared to conventional gene-count based approaches.
 - Enhanced Alternative Splicing Detection: By aggregating exon and junction reads from neighboring cells, DeepExonas significantly enhances the detection of alternative splicing events, providing deeper insights into cell-specific splicing patterns.
-- Superior Performance in Downstream Analysis: DeepExonas consistently outperforms conventional gene-count methods in multiple downstream tasks, including the identification of differential exon markers and alternative splicing events.
+- Superior Performance in Downstream Analysis: DeepExonas consistently outperforms conventional gene-count methods in multiple downstream tasks, including the identification of differential exon markers and alternative splicing events. This high-resolution approach allows DeepExonas to uncover biologically significant exon markers that are often missed by traditional methods.
 
 ## Installation
 
