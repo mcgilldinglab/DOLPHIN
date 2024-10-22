@@ -34,7 +34,7 @@ pip install .
 ## Tutorials:
 
 ### Dataset preparation
-Please refer to the step0_preprocess.ipynb file in the tutorial.
+Please refer to the step0_preprocess.ipynb file in the [tutorial](https://github.com/mcgilldinglab/DeepExonas/tree/main/tutorial).
 For the processed dataset, please download it from this link and save it to the est_dataset folder.
 [Prepare datasets to run DeepExonas.](https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=jNygC6)
 
