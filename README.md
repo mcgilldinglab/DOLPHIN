@@ -3,14 +3,14 @@ Advancing Cell Representation Beyond Gene-Level by Integrating Exon-Level Quanti
 
 ## Overview
 <img title="DeepExonas Overview" alt="Alt text" src="DeepExonas_overview.png">
-DeepExonas is an advanced deep learning framework designed for exon-level quantification and alternative splicing detection in single-cell RNA sequencing (scRNA-seq) data. Traditional gene-count methods often overlook critical exon and junction read information, missing intricate splicing mechanisms crucial for understanding complex cellular processes. DeepExonas addresses these limitations by integrating exon read counts and junction reads into a graph-based neural network model, allowing for more accurate cell representation and alternative splicing analysis.
+The advent of single-cell sequencing has revolutionized the study of cellular dynamics, providing unprecedented resolution into the molecular states and heterogeneity of individual cells. However, the rich potential of exon-level information and junction reads within single cells remains underutilized. Conventional gene-count methods overlook critical exon and junction data, limiting the quality of cell representation and downstream analyses such as subpopulation identification and alternative splicing detection. To address this, we introduce DeepExonas, a deep learning method that integrates exon-level and junction read data, representing genes as graph structures. These graphs are processed by a variational autoencoder to improve cell embeddings. Compared to conventional gene-based methods, DeepExonas shows superior performance in cell clustering, biomarker discovery, and alternative splicing detection, providing deeper insights into cellular processes. By examining cellular dynamics with enhanced resolution, DeepExonas detects subtle differences often missed at the gene level, offering new insights into disease mechanisms and potential therapeutic targets.
 
 ## Key Capabilities of DeepExonas:
 
 - Exon-Level Quantification: It represents genes as graphs, where nodes are exons and edges are junction reads, capturing detailed transcriptomic information at the exon level.
-- Enhanced Cell Clustering: The integration of exon and junction read data leads to improved cell clustering accuracy compared to gene-count based methods.
-- Alternative Splicing Detection: By aggregating exon and junction reads from neighboring cells, DeepExonas significantly enhances the detection of alternative splicing events, providing deeper insights into cell-specific splicing patterns.
-- Superior Performance: DeepExonas consistently outperforms conventional gene-count methods in identifying biologically significant features, including differential gene expression and splicing variations, particularly in cancer-related studies.
+- Better Cell Embedding: The integration of exon and junction read data leads to improved cell clustering accuracy compared to gene-count based methods.
+- Enhanced Alternative Splicing Detection: By aggregating exon and junction reads from neighboring cells, DeepExonas significantly enhances the detection of alternative splicing events, providing deeper insights into cell-specific splicing patterns.
+- Superior Performance in Downstream Analysis: DeepExonas consistently outperforms conventional gene-count methods in multiple downstream tasks, including the identification of differential exon markers and alternative splicing events.
 
 ## Installation
 
