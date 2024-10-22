@@ -35,6 +35,8 @@ pip install .
 
 ### Dataset preparation
 Please refer to the smart_seq_pre_process.sh file under the tutorial.
+For processed dataset, please download from here:
+[Prepare datasets to run DeepExonas.] (https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=jNygC6)
 
 ### Training on an example dataset
 ```
