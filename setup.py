@@ -10,6 +10,7 @@ setup(
     'optuna>=2.0.0,<3.0.0',
     'torch-geometric==2.2.0',
     'torch-sparse==0.6.16',
+    'torch-scatter==2.1.0',
     'h5py>=3.9.0',
     'igraph>=0.10.7',
     'igraph<=0.11',
