@@ -1,5 +1,5 @@
-# DeepExonas
-Advancing Cell Representation Beyond Gene-Level by Integrating Exon-Level Quantification and Junction Reads with Deep Neural Networks.
+# DOLPHIN
+**D**eep Ex**o**n-**l**evel Gra**ph** Neural Network for S**i**ngle-cell Representatio**n** Learning and Alternative Splicing
 
 ## Overview
 <img title="DeepExonas Overview" alt="Alt text" src="DeepExonas_overview.png">
