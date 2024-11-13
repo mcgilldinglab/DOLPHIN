@@ -1,5 +1,4 @@
 <img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">
-**D**eep Ex**o**n-**l**evel Gra**ph** Neural Network for S**i**ngle-cell Representatio**n** Learning and Alternative Splicing
 
 ## Overview
 <img title="DOLPHIN Overview" alt="Alt text" src="DOLPHIN_overview.png">
