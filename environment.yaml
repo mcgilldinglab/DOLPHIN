@@ -93,4 +93,3 @@ dependencies:
       - pytest-cov==6.0.0
       - simplejson==3.19.3
       - tomli==2.1.0
-prefix: /mnt/md2/bowen/miniconda3/envs/DOLPHIN
