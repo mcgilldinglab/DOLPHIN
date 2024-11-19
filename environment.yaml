@@ -74,7 +74,6 @@ dependencies:
   - zeromq=4.3.5=h3b0a872_7
   - zipp=3.21.0=pyhd8ed1ab_0
   - pip:
-      - anchor-bio==1.1.1
       - argcomplete==3.5.1
       - argh==0.31.3
       - coverage==7.6.7
