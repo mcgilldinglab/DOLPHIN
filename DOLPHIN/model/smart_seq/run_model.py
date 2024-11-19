@@ -15,8 +15,8 @@ The main function, hyperparameter search
 import scanpy as sc
 
 #load data
-in_path_gra = "../DOLPHIN/test_dataset/geometric_smart_seq_example.pt"
-in_path_fea = "../DOLPHIN/test_dataset/smart_seq_example_FeatureCompHvg5k.h5ad"
+in_path_gra = "../DOLPHIN/test_datasets/geometric_smart_seq_example.pt"
+in_path_fea = "../DOLPHIN/test_datasets/smart_seq_example_FeatureCompHvg5k.h5ad"
 
 output_path = "./output"
 
