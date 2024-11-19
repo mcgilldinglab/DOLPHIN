@@ -34,8 +34,7 @@ pip install .
 
 ### Dataset preparation
 Please refer to the step0_preprocess.ipynb file in the [tutorial](https://github.com/mcgilldinglab/DOLPHIN/tree/main/tutorial).
-For the processed dataset, please download it from this link and save it to the test_dataset folder.
-[Prepare datasets to run DOLPHIN.](https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=jNygC6)
+For the processed dataset, please download it from this [link](https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=jNygC6) and save it to the [test_dataset folder](https://github.com/mcgilldinglab/DOLPHIN/tree/main/DOLPHIN/test_dataset).
 
 ### Training on an example dataset
 ```
