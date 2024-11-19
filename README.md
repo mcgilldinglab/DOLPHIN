@@ -13,6 +13,9 @@ The advent of single-cell sequencing has revolutionized the study of cellular dy
 
 ## Installation
 
+Installing DOLPHIN directly from GitHub ensures you have the latest version. 
+**(Please install directly from GitHub to use the provided Jupyter notebooks for tutorials and walkthrough examples.)**
+
 ```
 git clone https://github.com/mcgilldinglab/DOLPHIN.git
 cd DOLPHIN
@@ -24,11 +27,6 @@ Create a conda environment using yaml file
 conda env create -f environment.yaml
 conda activate DOLPHIN
 ```
-
-### Install from Github
-
-Installing DOLPHIN directly from GitHub ensures you have the latest version. 
-**(Please install directly from GitHub to use the provided Jupyter notebooks for tutorials and walkthrough examples.)**
 
 ## Tutorials:
 
