@@ -131,40 +131,39 @@ def run_train(in_path_gp, in_path_fea, out_path, params, device, pretrain_fea=No
         if params["progress_checking"]:
             if ((epoch+1) % params["draw_freq"] == 0) and epoch > 0:
                 final_epoch.append(epoch)
-                type1_ARI, type2_ARI = z_leiden_cluster(out_path, vae, adata_fea, all_cell_loader, epoch, device)
-                final_type1_ARI.append(type1_ARI)
-                final_type2_ARI.append(type2_ARI)
-        else:
-            if (epoch == 1999) | (epoch == 999):
-                type1_ARI, type2_ARI = z_leiden_cluster(out_path, vae, adata_fea, all_cell_loader, epoch, device)
-        
+                z_leiden_cluster(out_path, vae, adata_fea, all_cell_loader, epoch, device)
+                # final_type1_ARI.append(type1_ARI)
+                # final_type2_ARI.append(type2_ARI)
+
         gc.collect()
         # allow reusable memory to be free
         torch.cuda.empty_cache()
 
-    #return the highest ARI score per each trial
-    criteria = type2_ARI
-    
-    #save final scores
-    if params["early_stopping"]:
-        f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize = (15,5))
-        ax1.plot(all_epoch, train_elbo, label='Training Loss') 
-        ax1.plot(all_epoch, val_elbo, label='Validation Loss') 
-        ax1.legend()
-        ax1.set_title("Loss")
-        
-        ax2.plot(final_epoch, final_type1_ARI)
-        ax2.set_title("Cell tyep1 ARI score")
-        
-        ax3.plot(final_epoch, final_type2_ARI)
-        ax3.set_title("Cell tyep2 ARI score")
-        plt.savefig(out_path+"/train_all_loss.png", bbox_inches="tight")
-    else:
-        plt.plot(all_epoch, train_elbo, label='Training Loss') 
-        # plt.plot(all_epoch, val_elbo, label='Validation Loss') 
-        plt.legend()
-        plt.title("Loss")
-        
-        plt.savefig(out_path+"/train_all_loss.png", bbox_inches="tight")
+    z_leiden_cluster(out_path, vae, adata_fea, all_cell_loader, epoch, device)
 
-    return criteria
+    #return the highest ARI score per each trial
+    # criteria = type2_ARI
+    
+    # #save final scores
+    # if params["early_stopping"]:
+    #     f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize = (15,5))
+    #     ax1.plot(all_epoch, train_elbo, label='Training Loss') 
+    #     ax1.plot(all_epoch, val_elbo, label='Validation Loss') 
+    #     ax1.legend()
+    #     ax1.set_title("Loss")
+        
+    #     ax2.plot(final_epoch, final_type1_ARI)
+    #     ax2.set_title("Cell tyep1 ARI score")
+        
+    #     ax3.plot(final_epoch, final_type2_ARI)
+    #     ax3.set_title("Cell tyep2 ARI score")
+    #     plt.savefig(out_path+"/train_all_loss.png", bbox_inches="tight")
+    # else:
+    #     plt.plot(all_epoch, train_elbo, label='Training Loss') 
+    #     # plt.plot(all_epoch, val_elbo, label='Validation Loss') 
+    #     plt.legend()
+    #     plt.title("Loss")
+        
+    #     plt.savefig(out_path+"/train_all_loss.png", bbox_inches="tight")
+
+    return 0
