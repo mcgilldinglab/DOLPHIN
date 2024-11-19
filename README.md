@@ -1,7 +1,7 @@
 <img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">
 
 ## Overview
-<img title="DOLPHIN Overview" alt="Alt text" src="DeepExonas_overview.png">
+<img title="DOLPHIN Overview" alt="Alt text" src="Overview_DOLPHIN.png">
 The advent of single-cell sequencing has revolutionized the study of cellular dynamics, providing unprecedented resolution into the molecular states and heterogeneity of individual cells. However, the rich potential of exon-level information and junction reads within single cells remains underutilized. Conventional gene-count methods overlook critical exon and junction data, limiting the quality of cell representation and downstream analyses such as subpopulation identification and alternative splicing detection. To address this, we introduce DOLPHIN, a deep learning method that integrates exon-level and junction read data, representing genes as graph structures. These graphs are processed by a variational autoencoder to improve cell embeddings. Compared to conventional gene-based methods, DOLPHIN shows superior performance in cell clustering, biomarker discovery, and alternative splicing detection, providing deeper insights into cellular processes. By examining cellular dynamics with enhanced resolution, DOLPHIN detects subtle differences often missed at the gene level, offering new insights into disease mechanisms and potential therapeutic targets.
 
 ## Key Capabilities of DOLPHIN:
