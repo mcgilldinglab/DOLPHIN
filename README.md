@@ -21,7 +21,7 @@ git clone https://github.com/mcgilldinglab/DOLPHIN.git
 cd DOLPHIN
 ```
 
-Create a conda environment using yaml file
+Create a conda environment using provided yaml file
 
 ```
 conda env create -f environment.yaml
