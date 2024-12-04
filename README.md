@@ -26,6 +26,7 @@ Create a conda environment using provided yaml file
 ```
 conda env create -f environment.yaml
 conda activate DOLPHIN
+pip install .
 ```
 
 ## Tutorials:
