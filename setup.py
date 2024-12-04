@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='DeepExonas',
+    name='DOLPHIN',
     version='0.1.0',
     
     packages=find_packages(),
@@ -70,6 +70,6 @@ setup(
     ],
     author='Kailu Song',
     author_email='kailu.song@mail.mcgill.ca',
-    description='DeepExonas: Advancing Cell Representation Beyond Gene-Level by Integrating Exon-Level Quantification and Junction Reads with Deep Neural Networks',
+    description='DOLPHIN: Advancing Single-cell RNA-seq Analysis Beyond Gene-Level by Integrating Exon-Level Quantification and Junction Reads with Deep Neural Networks',
     url='https://github.com/mcgilldinglab/DeepExonas.git',
 )
