@@ -2,12 +2,9 @@
 
 # -- Project information
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
-
-release = '0.1'
-version = '0.1.0'
+project = 'DOLPHIN'
+copyright = 'Ding Lab at McGill University'
+author = 'Kailu Song'
 
 # -- General configuration
 
@@ -17,6 +14,13 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'recommonmark',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.mathjax',
+    'sphinx_autodoc_typehints',
+    'sphinx_copybutton',
+    'nbsphinx','myst_nb'
 ]
 
 intersphinx_mapping = {
