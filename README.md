@@ -55,7 +55,8 @@ import DOLPHIN
    - For **Full-length scRNA-seq**, refer to the [Full-length scRNA-seq tutorial](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step1_1_preprocess_full_length.md).
 
    - For **10X RNA-seq**, refer to the [10X tutorial](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step1_2_preprocess_10X.md).
-
+     
+3. After aligning the RNA-seq data, generate the **feature matrix** and **adjacency matrix** using the provided methods in the tutorial. 
 
 ### Model Training and Cell Embedding Visualization
 [DOLPHIN Training and Cell Embedding](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/run_DOLPHIN.ipynb)
