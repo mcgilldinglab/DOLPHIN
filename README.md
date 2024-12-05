@@ -46,8 +46,16 @@ import DOLPHIN
 
 ## Tutorials:
 
-### Dataset preparation
-Please refer to the step0_preprocess.ipynb file in the [tutorial](https://github.com/mcgilldinglab/DOLPHIN/tree/main/tutorial).
+### Dataset Preparation
+
+1. First, generate the exon-level reference GTF file by following the instructions in the [exon_gtf_generation](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step0_generate_exon_gtf.ipynb) tutorial.
+
+2. Then, use the following tutorials to align the raw RNA-seq data and generate exon read counts and junction read counts:
+
+   - For **Full-length scRNA-seq**, refer to the [Full-length scRNA-seq tutorial](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step1_1_preprocess_full_length.md).
+
+   - For **10X RNA-seq**, refer to the [10X tutorial](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step1_2_preprocess_10X.md).
+
 
 ### Model Training and Cell Embedding Visualization
 [DOLPHIN Training and Cell Embedding](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/run_DOLPHIN.ipynb)
