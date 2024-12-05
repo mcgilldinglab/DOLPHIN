@@ -21,12 +21,22 @@ git clone https://github.com/mcgilldinglab/DOLPHIN.git
 cd DOLPHIN
 ```
 
-Create a conda environment using provided yaml file
+Creating and Activating the Conda Environment
 
 ```
 conda env create -f environment.yaml
 conda activate DOLPHIN
+```
+
+Installing the DOLPHIN Package
+1. Standard Installation
+```
 pip install .
+```
+
+2. Developer Mode Installation
+```
+pip install -e .
 ```
 
 ## Tutorials:
