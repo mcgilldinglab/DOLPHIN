@@ -49,10 +49,10 @@ import DOLPHIN
 ### Dataset preparation
 Please refer to the step0_preprocess.ipynb file in the [tutorial](https://github.com/mcgilldinglab/DOLPHIN/tree/main/tutorial).
 
-### DOLPHIN Model Traning
-Download processed dataset here [link](https://mcgill-my.sharepoint.com/my?id=%2Fpersonal%2Fkailu%5Fsong%5Fmail%5Fmcgill%5Fca%2FDocuments%2FDeepExonas%5Fgithub%5Fexample%2Fprocessed%5Fdataset)
+### Model Training and Cell Embedding Visualization
+[DOLPHIN Training and Cell Embedding](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/run_DOLPHIN.ipynb)
 
-```
-cd tutorial
-bash step1_run_model.sh
-```
+#### Run on example dataset:
+You can download the processed dataset from [here](https://mcgill-my.sharepoint.com/my?id=%2Fpersonal%2Fkailu%5Fsong%5Fmail%5Fmcgill%5Fca%2FDocuments%2FDeepExonas%5Fgithub%5Fexample%2Fprocessed%5Fdataset)
+and follow the [example](https://github.com/mcgilldinglab/DOLPHIN/blob/main/example/run_DOLPHIN.ipynb) to run the model.
+
