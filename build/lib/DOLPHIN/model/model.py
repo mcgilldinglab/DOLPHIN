@@ -28,33 +28,6 @@ class Gra_Encoder(nn.Module):
                 self.convs.append(GATConv(in_node_fea * nhead, h_dim, heads = nhead, dropout = gat_dropout, concat = concat))
             in_node_fea = h_dim
         self.act = nn.ReLU(inplace=True)
-
-        # Build Encoder
-        # modules = []
-        # if concat == True:
-        #     for h_dim in hidden_dim:
-        #         modules.append(
-        #             nn.Sequential(
-        #                 nn.Linear(in_fea * gat_channel[-1] * nhead, h_dim),
-        #                 nn.BatchNorm1d(h_dim, momentum=0.01, eps=0.001), 
-        #                 nn.LayerNorm(h_dim, elementwise_affine=False),
-        #                 nn.ReLU(),
-        #                 nn.Dropout(p=p_dropout))
-        #         )
-        #         in_fea = h_dim
-        # else:
-        #     for h_dim in hidden_dim:
-        #         modules.append(
-        #             nn.Sequential(
-        #                 nn.Linear(in_fea * gat_channel[-1], h_dim),
-        #                 nn.BatchNorm1d(h_dim, momentum=0.01, eps=0.001), 
-        #                 nn.LayerNorm(h_dim, elementwise_affine=False),
-        #                 nn.ReLU(),
-        #                 nn.Dropout(p=p_dropout))
-        #         )
-        #         in_fea = h_dim
-        
-        # self.encoder = nn.Sequential(*modules)
         
         modules = []
         if concat == True:
@@ -95,7 +68,7 @@ class Gra_Encoder(nn.Module):
         #graph attention layer
         x = data.x
         for i in range(len(self.hidden_channels)):
-            x = self.convs[i](x, data.edge_index, data.edge_weight)
+            x = self.convs[i](x, data.edge_index, data.edge_attr)
             x = self.act(x)
         x_gat_conv = x.reshape(batch, -1)
         
@@ -248,28 +221,17 @@ class VAE(nn.Module):
         pyro.module("fea_decoder", self) #give Decoder a name = "fea_decoder", let pyro knows all the parameters inside Decoder
         pyro.module("adj_decoder", self)
         with pyro.plate("data", x_gra.y.shape[0]): #use pyro.plate to declare the mini-batch size
-            # setup hyperparameters(mu, variance) for prior p(z), it's actually constrained in guide
-                # define size with torch.Size, but reture with same dtype as x and will be on the same device as x
-                # x.shape[0] is the batch size
-                #define batch size inside plate
             x_fea = x_gra.x_fea
             x_adj = x_gra.x_adj
             batch = x_fea.shape[0]
             z_loc = x_fea.new_zeros(torch.Size((batch, self.z_dim))) 
             z_scale = x_fea.new_ones(torch.Size((batch, self.z_dim)))
 
-            # sample from prior (value will be sampled by guide when computing the ELBO)
-            # pyro create a normal distribution as prior(q(z)) and then sample from this prior to get z
-            # z_loc and z_scale is the set of parameters, each pair of parameter will produce a normal distribution,
-            # z will sample from each of this distributions, so the size of z = batch_size * latent_space
-            # .to_event(1) sample z from multivariate normal distribution instead from each univariate normal distribution
             with poutine.scale(scale = self.kl_beta):
                 z = pyro.sample("latent", dist.Normal(z_loc, z_scale).to_event(1))
 
             ## Reconstruction Loss
-            ## since it's single cell data, assume the parameters output from decoder is zero inflated negative binomial distribution
-            ## we want to get the probability of p(x|z) (likelihood), measure the probability of seeing the output given the z that was sampled.
-            
+
             #sample from z to get fea
             ## parameterization from zero inflated negative binomial
             # get the "normalized" mean of the negative binomial
@@ -301,7 +263,6 @@ class VAE(nn.Module):
             adj_nb_logits = (adj_px_rate + 1e-4).log() - (adj_theta + 1e-4).log()
             adj_x_dist = dist.ZeroInflatedNegativeBinomial(total_count=adj_theta, logits=adj_nb_logits, gate_logits=adj_glog)
             with poutine.scale(scale = self.adj_lambda):
-                # score against actual counts
                 adj_rx=pyro.sample("obs2", adj_x_dist.to_event(1), obs=x_adj)
 
             return fea_rx, adj_rx
@@ -321,8 +282,6 @@ class VAE(nn.Module):
     def getZ(self, x_gra):
         batch = x_gra.x_fea.shape[0]
         [z_mu, z_var] = self.gra_encoder(x_gra, batch)
-        # sample in latent space
-        # z = dist.Normal(z_mu, z_var.sqrt()).sample()
         return z_mu, z_mu + z_var
 
 def define_svi(in_node_fea, in_fea, in_adj, params, device, pretrain_path_fea = None, pretrain_path_adj = None):
@@ -333,34 +292,7 @@ def define_svi(in_node_fea, in_fea, in_adj, params, device, pretrain_path_fea = 
               in_adj, params["list_adj_dec_hid"],
               params["kl_beta"], params["fea_lambda"], params["adj_lambda"]
               )
-    ###load pre_train model
-    if params["pre_train_load"]:
-        ### load adj pretrain model dict
-        adj_pretrained_dict= torch.load(pretrain_path_adj)
-
-        #### update current model
-        ## use adj_pretrain to initialize gra_encoder and adj_deocder
-        for name in vae.state_dict().keys():
-            if name in adj_pretrained_dict["model_state_dict"].keys():
-                print(name)
-                vae.state_dict()[name].copy_(adj_pretrained_dict["model_state_dict"][name])
-
-        ### load feature pretrain model dict_only load fea_decoder
-        fea_pretrained_dict= torch.load(pretrain_path_fea)
-
-        ### remove gra_encoder weight from feature
-        new_fea_pretrained_dict = fea_pretrained_dict["model_state_dict"].copy()
-        for key, value in fea_pretrained_dict["model_state_dict"].items():
-            if "gra_encoder" in key:
-                new_fea_pretrained_dict.pop(key)
-
-        #### update current model
-        ## use adj_pretrain to initialize gra_encoder and adj_deocder
-        for name in vae.state_dict().keys():
-            if name in new_fea_pretrained_dict.keys():
-                print(name)
-                vae.state_dict()[name].copy_(new_fea_pretrained_dict[name])
-
+    
     # put the vae model in gpu
     vae.cuda(device)
     vae.train()

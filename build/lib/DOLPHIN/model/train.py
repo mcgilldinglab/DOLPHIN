@@ -54,7 +54,7 @@ def run_train(in_path_gp, in_path_fea, out_path, params, device, pretrain_fea=No
         total_epoch_loss_train = train_step(svi, all_cell_loader, device)
         train_elbo.append(total_epoch_loss_train)
         
-        print("[epoch %03d] training loss: %.4f" % (epoch, total_epoch_loss_train))
+        # print("[epoch %03d] training loss: %.4f" % (epoch, total_epoch_loss_train))
 
         gc.collect()
         torch.cuda.empty_cache()
