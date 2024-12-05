@@ -129,5 +129,4 @@ dependencies:
       - umap-learn==0.5.7
       - urllib3==2.2.3
       - yarl==1.17.2
-      - pybedtools==0.10.0
 prefix: /mnt/md2/kailu_test/miniconda3/envs/DOLPHIN

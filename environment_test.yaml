@@ -1,5 +1,7 @@
 name: DOLPHIN
 channels:
+  - bioconda
+  - conda-forge
   - defaults
 dependencies:
   - _libgcc_mutex=0.1=main
@@ -53,6 +55,7 @@ dependencies:
   - tornado=6.4.1=py310h5eee18b_0
   - traitlets=5.14.3=py310h06a4308_0
   - typing_extensions=4.11.0=py310h06a4308_0
+  - tzdata=2024b=h04d1e81_0
   - wcwidth=0.2.5=pyhd3eb1b0_0
   - wheel=0.44.0=py310h06a4308_0
   - xz=5.4.6=h5eee18b_1
@@ -70,25 +73,18 @@ dependencies:
       - certifi==2024.8.30
       - charset-normalizer==3.4.0
       - contourpy==1.3.1
-      - cycler==0.12.1
       - filelock==3.16.1
       - fonttools==4.55.0
       - frozenlist==1.5.0
       - fsspec==2024.10.0
-      - h5py==3.12.1
       - idna==3.10
       - jinja2==3.1.4
-      - joblib==1.4.2
-      - kiwisolver==1.4.7
       - legacy-api-wrap==1.4
-      - llvmlite==0.43.0
       - markupsafe==3.0.2
       - matplotlib==3.9.2
       - mpmath==1.3.0
       - multidict==6.1.0
-      - natsort==8.4.0
       - networkx==3.4.2
-      - numba==0.60.0
       - numpy==2.0.2
       - nvidia-cublas-cu12==12.1.3.1
       - nvidia-cuda-cupti-cu12==12.1.105
@@ -103,21 +99,19 @@ dependencies:
       - nvidia-nvjitlink-cu12==12.6.77
       - nvidia-nvtx-cu12==12.1.105
       - opt-einsum==3.4.0
-      - pandas==2.2.3
       - patsy==1.0.1
       - pillow==11.0.0
       - propcache==0.2.0
+      - pybedtools==0.10.0
       - pynndescent==0.5.13
       - pyparsing==3.2.0
       - pyro-api==0.1.2
       - pyro-ppl==1.9.1
+      - pysam==0.22.1
       - requests==2.32.3
       - scanpy==1.10.4
       - scikit-learn==1.5.2
-      - scipy==1.14.1
       - seaborn==0.13.2
-      - session-info==1.0.0
-      - statsmodels==0.14.4
       - stdlib-list==0.11.0
       - sympy==1.13.3
       - threadpoolctl==3.5.0
@@ -125,9 +119,7 @@ dependencies:
       - torch-geometric==2.6.1
       - tqdm==4.67.0
       - triton==3.0.0
-      - tzdata==2024.2
       - umap-learn==0.5.7
       - urllib3==2.2.3
       - yarl==1.17.2
-      - pybedtools==0.10.0
-prefix: /mnt/md2/kailu_test/miniconda3/envs/DOLPHIN
+prefix: /mnt/md0/kailu/anaconda3/envs/DOLPHIN
