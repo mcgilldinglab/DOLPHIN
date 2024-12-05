@@ -14,7 +14,7 @@ The advent of single-cell sequencing has revolutionized the study of cellular dy
 ## Installation
 
 Installing DOLPHIN directly from GitHub ensures you have the latest version. 
-**(Please install directly from GitHub to use the provided Jupyter notebooks for tutorials and walkthrough examples.)**
+**(Please install directly from GitHub to use the provided Jupyter notebooks for tutorials)**
 
 ```
 git clone https://github.com/mcgilldinglab/DOLPHIN.git
@@ -50,7 +50,7 @@ import DOLPHIN
 Please refer to the step0_preprocess.ipynb file in the [tutorial](https://github.com/mcgilldinglab/DOLPHIN/tree/main/tutorial).
 
 ### DOLPHIN Model Traning
-Download processed dataset here [link]([https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=jNygC6](https://mcgill-my.sharepoint.com/my?id=%2Fpersonal%2Fkailu%5Fsong%5Fmail%5Fmcgill%5Fca%2FDocuments%2FDeepExonas%5Fgithub%5Fexample%2Fprocessed%5Fdataset))
+Download processed dataset here [link](https://mcgill-my.sharepoint.com/my?id=%2Fpersonal%2Fkailu%5Fsong%5Fmail%5Fmcgill%5Fca%2FDocuments%2FDeepExonas%5Fgithub%5Fexample%2Fprocessed%5Fdataset)
 
 ```
 cd tutorial
