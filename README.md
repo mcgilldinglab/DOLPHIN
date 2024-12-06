@@ -56,7 +56,7 @@ import DOLPHIN
 
    - For **10X RNA-seq**, refer to the [10X tutorial](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step1_2_preprocess_10X.md).
      
-3. After aligning the RNA-seq data, generate the **feature matrix** and **adjacency matrix** using the provided methods in the tutorial. 
+3. After aligning the RNA-seq data, generate the **feature matrix** and **adjacency matrix** using the provided [methods](./tutorial/step2_graph_generation.ipynb) in the tutorial. 
 
 ### Model Training and Cell Embedding Visualization
 [DOLPHIN Training and Cell Embedding](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/run_DOLPHIN.ipynb)
