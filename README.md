@@ -65,3 +65,9 @@ import DOLPHIN
 You can download the processed dataset from [here](https://mcgill-my.sharepoint.com/my?id=%2Fpersonal%2Fkailu%5Fsong%5Fmail%5Fmcgill%5Fca%2FDocuments%2FDeepExonas%5Fgithub%5Fexample%2Fprocessed%5Fdataset)
 and follow the [example](https://github.com/mcgilldinglab/DOLPHIN/blob/main/example/run_DOLPHIN.ipynb) to run the model.
 
+### Cell Aggregation
+[Cell Aggregation Tutorial](./tutorial/step4_cell_aggregation.ipynb)
+
+### Alternative Splicing Analysis
+1. Using Outrigger to detect Alternative Splicing: [Alternative splicing detection](./tutorial/step5_alternative_splicing.md)
+2. Alternative splicing analysis
