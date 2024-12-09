@@ -74,3 +74,7 @@ For a detailed tutorial on cell aggregation, please refer to the [Cell Aggregati
 
 2. **Alternative Splicing Analysis**:
    This section explains the alternative splicing analysis performed as described in the manuscript. For a detailed tutorial, please refer to the [Alternative Splicing Analysis](./tutorial/step6_alternative_splicing_analysis.ipynb).
+
+### Exon-Level Differential Gene Analysis
+
+For a detailed walkthrough of the exon-level differential gene analysis, please follow this [tutorial](./tutorial/step7_2_EDEG_analysis.ipynb).
