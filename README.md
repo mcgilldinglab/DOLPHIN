@@ -66,8 +66,11 @@ You can download the processed dataset from [here](https://mcgill-my.sharepoint.
 and follow the [example](https://github.com/mcgilldinglab/DOLPHIN/blob/main/example/run_DOLPHIN.ipynb) to run the model.
 
 ### Cell Aggregation
-[Cell Aggregation Tutorial](./tutorial/step4_cell_aggregation.ipynb)
+For a detailed tutorial on cell aggregation, please refer to the [Cell Aggregation Tutorial](./tutorial/step4_cell_aggregation.ipynb).
 
 ### Alternative Splicing Analysis
-1. Using Outrigger to detect Alternative Splicing: [Alternative splicing detection](./tutorial/step5_alternative_splicing.md)
-2. Alternative splicing analysis
+1. **Detecting Alternative Splicing using Outrigger**: 
+   To detect alternative splicing events, please follow the [Alternative Splicing Detection Tutorial](./tutorial/step5_alternative_splicing.md).
+
+2. **Alternative Splicing Analysis**:
+   This section explains the alternative splicing analysis performed as described in the manuscript. For a detailed tutorial, please refer to the [Alternative Splicing Analysis](./tutorial/step6_alternative_splicing_analysis.ipynb).
