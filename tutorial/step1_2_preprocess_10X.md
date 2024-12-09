@@ -84,6 +84,15 @@ STAR --runThreadN 16 \
     --outSAMtype BAM SortedByCoordinate \
     --readFilesType SAM SE \
     --outFileNamePrefix ./03_exon_star/${ID_SAMPLE}/${ID_SAMPLE}.
+
+mkdir ./02_exon_std/${ID_SAMPLE}
+STAR --runThreadN 16 \
+    --genomeDir /mnt/data/kailu/STAR_example/ensembl_indx/ \
+    --readFilesIn ./02_single_std_bam/T10/PADC_sub_T10.TAG_CB_${ID_SAMPLE}.bam \
+    --readFilesCommand samtools view -F 0x100 \
+    --outSAMtype BAM SortedByCoordinate \
+    --readFilesType SAM SE \
+    --outFileNamePrefix ./02_exon_std/${ID_SAMPLE}/${ID_SAMPLE}.std.
 ```
 
 ### Step 8: Count Exon Reads and Junction Reads

@@ -45,7 +45,7 @@ trim = "/mnt/data/kailu/Apps/Trimmomatic-0.39/trimmomatic-0.39.jar"
 java -jar $trim SE ${ID_SAMPLE}.fastq.gz ${ID_SAMPLE}.trim.fastq.gz ILLUMINACLIP:/mnt/data/kailu/Apps/Trimmomatic-0.39/adapters/TruSeq3-SE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36 	
 ```
 
-### Step5: STAR Alignment 
+### Step5: STAR Alignment - align to modifed exon gtf file and standard reference genome
 ```bash
 ## `ID_SAMPLE` is the Cell Barcode Name
 mkdir ./03_exon_star/${ID_SAMPLE}
@@ -55,6 +55,14 @@ STAR --runThreadN 4 \
     --readFilesCommand gunzip -c \
     --outSAMtype BAM SortedByCoordinate \
     --outFileNamePrefix ./03_exon_star/${ID_SAMPLE}/${ID_SAMPLE}.
+
+mkdir ./02_exon_std/${ID_SAMPLE}
+STAR --runThreadN 4 \
+    --genomeDir /mnt/data/kailu/STAR_example/ensembl_indx/ \
+    --readFilesIn ${ID_SAMPLE}.trim.fastq.gz  \
+    --readFilesCommand gunzip -c \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix ./02_exon_std/${ID_SAMPLE}/${ID_SAMPLE}.std.
 ```
 
 ### Step 6: Count Exon Reads and Junction Reads
