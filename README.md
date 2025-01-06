@@ -78,3 +78,6 @@ For a detailed tutorial on cell aggregation, please refer to the [Cell Aggregati
 ### Exon-Level Differential Gene Analysis
 
 For a detailed walkthrough of the exon-level differential gene analysis, please follow this [tutorial](./tutorial/step7_2_EDEG_analysis.ipynb).
+
+
+If you find the tool is useful to your study, please consider citing the DOLPHIN [manuscript](https://doi.org/10.21203/rs.3.rs-5474597/v1).
