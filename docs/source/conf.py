@@ -26,6 +26,8 @@ extensions = [
 ]
 
 nbsphinx_execute = 'never'
+highlight_language = "python"
+pygments_style = "friendly"
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
@@ -39,7 +41,5 @@ templates_path = ['_templates']
 
 html_theme = 'sphinx_rtd_theme'
 
-highlight_language = "python"
-pygments_style = "friendly"
 # -- Options for EPUB output
 epub_show_urls = 'footnote'

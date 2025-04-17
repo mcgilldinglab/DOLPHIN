@@ -16,18 +16,18 @@ differential gene analysis at exon level, alternative splicing.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Examples
+   :caption: Tutorials
 
-   examples/index.rst
+   tutorials/index
 
 .. toctree::
    :maxdepth: 1
-   :caption: Tutorials
+   :caption: Examples
 
-   tutorials/index.rst
+   examples/index
 
 .. toctree::
    :maxdepth: 1
    :caption: API Documentations
 
-   API/index.rst
+   API/index
