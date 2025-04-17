@@ -14,14 +14,18 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
-    'recommonmark',
+    # 'recommonmark',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
-    'nbsphinx','myst_nb'
+    'nbsphinx',
+    'myst_parser'
+    # 'myst_nb'
 ]
+
+nbsphinx_execute = 'never'
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
