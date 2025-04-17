@@ -16,6 +16,8 @@ The advent of single-cell sequencing has revolutionized the study of cellular dy
 Installing DOLPHIN directly from GitHub ensures you have the latest version. 
 **(Please install directly from GitHub to use the provided Jupyter notebooks for tutorials)**
 
+**Note:** This tool has been primarily tested on Linux-based systems. While it may run on other platforms, we recommend using a Linux environment for best compatibility and performance, especially for memory-intensive preprocessing steps such as STAR or Cell Ranger alignment. 
+
 ```
 git clone https://github.com/mcgilldinglab/DOLPHIN.git
 cd DOLPHIN
