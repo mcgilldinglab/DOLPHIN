@@ -4,14 +4,9 @@ build:
   os: "ubuntu-22.04"
   tools:
     python: "3.10"
-    # ✅ 正确方式是这样启用 conda，不是赋值字符串
-    conda: true
 
 conda:
   environment: environment_v2.yaml
 
 sphinx:
   configuration: docs/source/conf.py
-
-python:
-  install: []  # ✅ 禁止多余的 pip 安装
