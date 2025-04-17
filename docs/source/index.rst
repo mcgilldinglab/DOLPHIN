@@ -30,4 +30,4 @@ differential gene analysis at exon level, alternative splicing.
    :maxdepth: 1
    :caption: API Documentations
 
-   api/index.rst
+   API/index.rst
