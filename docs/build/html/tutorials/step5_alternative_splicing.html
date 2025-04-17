@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detect Alternative Splicing Events with Outrigger &mdash; DOLPHIN  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Alternative Splicing Analysis" href="step6_alternative_splicing_analysis.html" />
+    <link rel="prev" title="Cell Aggregation" href="step4_cell_aggregation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DOLPHIN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started with DOLPHIN:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="step0_generate_exon_gtf.html">Exon-Level Reference GTF File Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step1_1_preprocess_full_length.html">Preprocessing Full-Length Single-Cell RNA-Seq for Exon and Junction Read Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step1_2_preprocess_10X.html">Preprocessing 10X Single-Cell RNA-Seq for Exon and Junction Read Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step2_1_graph_generation.html">Generate Feature Matrix and Adjacency Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step2_2_exonGene_matrix_generation.html">Generate Exon Gene h5ad and Select Highly Variable Genes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step2_3_feature_matrix_generation.html">Generate Feature Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step2_4_adjacency_matrix_generation.html">Generate Adjacency Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step2_5_graph_data_generation.html">Generate Graph Data for MODEl input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step3_run_DOLPHIN.html">Setup and Train the DOLPHIN Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step4_cell_aggregation.html">Cell Aggregation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Detect Alternative Splicing Events with Outrigger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step6_alternative_splicing_analysis.html">Alternative Splicing Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step6_alternative_splicing_analysis.html#Generate-PSI-adata">Generate PSI adata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step6_alternative_splicing_analysis.html#Differential-Alternative-Splicing-Events">Differential Alternative Splicing Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step7_1_MAST.html">Run MAST to get Exon level p-value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step7_2_EDEG_analysis.html">Exon-Level Differential Gene Analysis Using Feature Matrix</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../API/index.html">API Documentations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DOLPHIN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Detect Alternative Splicing Events with Outrigger</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/step5_alternative_splicing.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="detect-alternative-splicing-events-with-outrigger">
+<h1>Detect Alternative Splicing Events with Outrigger<a class="headerlink" href="#detect-alternative-splicing-events-with-outrigger" title="Permalink to this heading"></a></h1>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="k">for</span><span class="w"> </span>ID_SAMPLE<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>tail<span class="w"> </span>-n<span class="w"> </span>+2<span class="w"> </span>../your_metaData.csv<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="w"> </span><span class="s1">$&#39;\t&#39;</span><span class="w"> </span>-f1<span class="k">)</span>
+<span class="k">do</span><span class="w">  </span>
+<span class="w">	</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ID_SAMPLE</span><span class="s2">&quot;</span>
+
+<span class="w">    </span>mkdir<span class="w"> </span>./combine_KNN10_STAR/<span class="nv">$ID_SAMPLE</span>
+<span class="w">    </span>STAR<span class="w"> </span>--runThreadN<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
+<span class="w">		</span>--genomeDir<span class="w"> </span>/mnt/data/kailu/STAR_example/ensembl_indx/<span class="w"> </span><span class="se">\</span>
+<span class="w">		</span>--readFilesIn<span class="w"> </span>./DOLPHIN_aggregation/final_bam/<span class="nv">$ID_SAMPLE</span>.final.bam<span class="w"> </span><span class="se">\</span>
+<span class="w">		</span>--readFilesCommand<span class="w"> </span>samtools<span class="w"> </span>view<span class="w"> </span>-F<span class="w"> </span>0x100<span class="w"> </span><span class="se">\</span>
+<span class="w">		</span>--outSAMtype<span class="w"> </span>BAM<span class="w"> </span>Unsorted<span class="w"> </span><span class="se">\</span>
+<span class="w">		</span>--readFilesType<span class="w"> </span>SAM<span class="w"> </span>SE<span class="w"> </span><span class="se">\</span>
+<span class="w">		</span>--outFileNamePrefix<span class="w"> </span>./combine_KNN10_STAR/<span class="nv">$ID_SAMPLE</span>/<span class="si">${</span><span class="nv">ID_SAMPLE</span><span class="si">}</span>.exon.
+
+<span class="w">	</span>scp<span class="w"> </span>-r<span class="w"> </span>./combine_KNN10_STAR/<span class="nv">$ID_SAMPLE</span>/<span class="si">${</span><span class="nv">ID_SAMPLE</span><span class="si">}</span>.exon.SJ.out.tab<span class="w"> </span>./combine_KNN10_SJ/
+
+<span class="w">	</span>rm<span class="w"> </span>-r<span class="w"> </span>./combine_KNN10_STAR/<span class="nv">$ID_SAMPLE</span>
+<span class="k">done</span>
+
+<span class="nb">cd</span><span class="w"> </span>./combine_KNN10_SJ/
+outrigger<span class="w"> </span>index<span class="w"> </span>--sj-out-tab<span class="w"> </span>*SJ.out.tab<span class="w"> </span>--gtf<span class="w"> </span>Homo_sapiens.GRCh38.107.gtf
+<span class="c1">### modify the bed file to add &quot;chr&quot; in the beginning of each bed file</span>
+<span class="k">for</span><span class="w"> </span>file<span class="w"> </span><span class="k">in</span><span class="w"> </span>./outrigger_output/index/mxe/*.bed
+<span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$file</span>
+<span class="w">    </span>sed<span class="w"> </span>-i<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/^/chr/&#39;</span><span class="w"> </span><span class="nv">$file</span>
+<span class="k">done</span>
+<span class="k">for</span><span class="w"> </span>file<span class="w"> </span><span class="k">in</span><span class="w"> </span>./outrigger_output/index/se/*.bed
+<span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$file</span>
+<span class="w">    </span>sed<span class="w"> </span>-i<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/^/chr/&#39;</span><span class="w"> </span><span class="nv">$file</span>
+<span class="k">done</span>
+<span class="c1">## using modified fasta file to validate the event</span>
+outrigger<span class="w"> </span>validate<span class="w"> </span>--genome<span class="w"> </span>hg38<span class="w"> </span>--fasta<span class="w"> </span>./Homo_sapiens.GRCh38.dna_sm.primary_assembly.addchr.fa
+outrigger<span class="w"> </span>psi
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="step4_cell_aggregation.html" class="btn btn-neutral float-left" title="Cell Aggregation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="step6_alternative_splicing_analysis.html" class="btn btn-neutral float-right" title="Alternative Splicing Analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ding Lab at McGill University.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

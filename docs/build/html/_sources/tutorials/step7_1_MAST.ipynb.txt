@@ -1,0 +1,69 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Run MAST to get Exon level p-value"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "library(dplyr)\n",
+    "library(Seurat)\n",
+    "library(patchwork)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "seurat_obj <- readRDS(file = \"Feature_PAAD_N3_T10_T8_T20_seurat_object_main.rds\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Idents(seurat_obj) <- \"Condition\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "seurat_obj <- NormalizeData(seurat_obj, normalization.method = \"LogNormalize\", scale.factor = 10000)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "for (cluster_name in c('2')) {\n",
+    "    sub_seurat <- subset(seurat_obj, subset=leiden_0_1 == cluster_name)\n",
+    "    DE_MAST <- FindMarkers(sub_seurat, ident.1=\"Cancer\", ident.2=\"Normal\", test.use=\"MAST\", logfc.threshold=0.5)\n",
+    "    write.csv(DE_MAST, file = paste0(\"./MAST/\", \"Feature_MAST_\",\"leiden_0_1\", \"_cluster_\", cluster_name,\".csv\"), row.names = TRUE)\n",
+    "}"
+   ]
+  }
+ ],
+ "metadata": {
+  "language_info": {
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

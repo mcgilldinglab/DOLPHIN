@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generate Feature Matrix &mdash; DOLPHIN  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Generate Adjacency Matrix" href="step2_4_adjacency_matrix_generation.html" />
+    <link rel="prev" title="Generate Exon Gene h5ad and Select Highly Variable Genes" href="step2_2_exonGene_matrix_generation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DOLPHIN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started with DOLPHIN:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="step0_generate_exon_gtf.html">Exon-Level Reference GTF File Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step1_1_preprocess_full_length.html">Preprocessing Full-Length Single-Cell RNA-Seq for Exon and Junction Read Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step1_2_preprocess_10X.html">Preprocessing 10X Single-Cell RNA-Seq for Exon and Junction Read Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step2_1_graph_generation.html">Generate Feature Matrix and Adjacency Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step2_2_exonGene_matrix_generation.html">Generate Exon Gene h5ad and Select Highly Variable Genes</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Generate Feature Matrix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Filter-Feature-Matrix-with-Highly-Variable-Genes-(HVG)">Filter Feature Matrix with Highly Variable Genes (HVG)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="step2_4_adjacency_matrix_generation.html">Generate Adjacency Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step2_5_graph_data_generation.html">Generate Graph Data for MODEl input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step3_run_DOLPHIN.html">Setup and Train the DOLPHIN Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step4_cell_aggregation.html">Cell Aggregation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step5_alternative_splicing.html">Detect Alternative Splicing Events with Outrigger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step6_alternative_splicing_analysis.html">Alternative Splicing Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step6_alternative_splicing_analysis.html#Generate-PSI-adata">Generate PSI adata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step6_alternative_splicing_analysis.html#Differential-Alternative-Splicing-Events">Differential Alternative Splicing Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step7_1_MAST.html">Run MAST to get Exon level p-value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step7_2_EDEG_analysis.html">Exon-Level Differential Gene Analysis Using Feature Matrix</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../API/index.html">API Documentations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DOLPHIN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Generate Feature Matrix</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/step2_3_feature_matrix_generation.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Generate-Feature-Matrix">
+<h1>Generate Feature Matrix<a class="headerlink" href="#Generate-Feature-Matrix" title="Permalink to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">DOLPHIN</span> <span class="kn">import</span> <span class="n">combine_fea</span><span class="p">,</span> <span class="n">fea_comp</span><span class="p">,</span> <span class="n">get_fea_hvg</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/mnt/md0/kailu/anaconda3/envs/DOLPHIN/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="s2">&quot;your_metaData.csv&quot;</span>
+<span class="n">df_label</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">total_sample_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_label</span><span class="p">)</span>
+
+<span class="c1"># Define your study name (update this for your specific study)</span>
+<span class="n">study_name</span> <span class="o">=</span> <span class="s2">&quot;STUDY&quot;</span>
+
+<span class="n">fea_run_num</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="n">output_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_folder</span><span class="p">,</span> <span class="s2">&quot;final_data&quot;</span><span class="p">)</span>
+<span class="n">graph_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_folder</span> <span class="s2">&quot;06_graph_mtx&quot;</span><span class="p">)</span>
+<span class="n">exon_gene_featurecount_directory</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">main_folder</span><span class="p">,</span> <span class="s2">&quot;04_exon_gene_cnt&quot;</span><span class="p">)</span>
+
+<span class="c1"># Required files</span>
+<span class="n">gene_annotation</span> <span class="o">=</span> <span class="s2">&quot;gene_id_annotation.csv&quot;</span>
+<span class="n">gtf_pkl_path</span> <span class="o">=</span> <span class="s2">&quot;gtf.pkl&quot;</span>
+<span class="n">gtf_jun_pkl_path</span> <span class="o">=</span> <span class="s2">&quot;df_jun_gtf.pkl&quot;</span>
+<span class="n">gtf_path</span><span class="o">=</span> <span class="s2">&quot;Homo_sapiens.GRCh38.107.gtf&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start Combine Feature Matrix&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">total_sample_size</span><span class="p">)</span> <span class="k">as</span> <span class="n">pbar_fea</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total_sample_size</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">%</span><span class="k">fea_run_num</span>==0:
+            <span class="n">pbar_fea</span><span class="o">=</span><span class="n">combine_fea</span><span class="p">(</span><span class="n">pbar_fea</span><span class="p">,</span> <span class="n">df_label</span><span class="p">,</span> <span class="n">graph_directory</span><span class="p">,</span> <span class="n">gene_annotation</span><span class="p">,</span> <span class="n">gtf_pkl_path</span><span class="p">,</span> <span class="n">start_idx</span> <span class="o">=</span> <span class="n">i</span><span class="p">,</span> <span class="n">sample_num</span><span class="o">=</span><span class="n">fea_run_num</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">output_name</span><span class="o">=</span> <span class="n">study_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#### combine all feature .h5ad files</span>
+<span class="n">total_number_fea_anndata</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">total_sample_size</span><span class="o">/</span><span class="n">fea_run_num</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">_idx</span><span class="p">,</span> <span class="n">_fea_idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total_number_fea_anndata</span><span class="p">)):</span>
+    <span class="n">_temp_ad</span> <span class="o">=</span> <span class="n">anndata</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span> <span class="s2">&quot;Feature_&quot;</span><span class="o">+</span><span class="n">study_name</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">_fea_idx</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;.h5ad&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">_idx</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">combine_anndata_fea</span> <span class="o">=</span> <span class="n">_temp_ad</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">combine_anndata_fea</span> <span class="o">=</span> <span class="n">combine_anndata_fea</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">_temp_ad</span><span class="p">,</span> <span class="n">index_unique</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">batch_key</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+<span class="n">combine_anndata_fea</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span><span class="s2">&quot;Feature_&quot;</span><span class="o">+</span><span class="n">study_name</span><span class="o">+</span><span class="s2">&quot;.h5ad&quot;</span><span class="p">))</span>
+
+<span class="n">fea_comp</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">study_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">### Remove All Temporary Datasets</span>
+<span class="n">file_pattern</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Feature_</span><span class="si">{</span><span class="n">study_name</span><span class="si">}</span><span class="s2">_*&quot;</span><span class="p">)</span>
+
+<span class="n">files_to_remove</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">file_pattern</span><span class="p">)</span>
+
+<span class="c1"># Remove each file</span>
+<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files_to_remove</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>  <span class="c1"># Check if the file exists</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removed: </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found: </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Filter-Feature-Matrix-with-Highly-Variable-Genes-(HVG)">
+<h2>Filter Feature Matrix with Highly Variable Genes (HVG)<a class="headerlink" href="#Filter-Feature-Matrix-with-Highly-Variable-Genes-(HVG)" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">get_fea_hvg</span><span class="p">(</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">study_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="step2_2_exonGene_matrix_generation.html" class="btn btn-neutral float-left" title="Generate Exon Gene h5ad and Select Highly Variable Genes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="step2_4_adjacency_matrix_generation.html" class="btn btn-neutral float-right" title="Generate Adjacency Matrix" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ding Lab at McGill University.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
