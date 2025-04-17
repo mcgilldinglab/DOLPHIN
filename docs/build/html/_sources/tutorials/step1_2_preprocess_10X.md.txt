@@ -2,7 +2,7 @@
 
 Here is the brief pipeline for full-length and 10x single-cell RNA-seq shown:
 
-<img title="preprocess pipeline" alt="Alt text" src="preprocess_pipeline.png" />
+![preprocess pipeline](../_static/preprocess_pipeline.png)
 
 ### Step 1: Download Required Tools
 
