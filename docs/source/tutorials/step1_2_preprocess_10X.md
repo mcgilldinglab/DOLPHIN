@@ -4,7 +4,7 @@ Here is the brief pipeline for full-length and 10x single-cell RNA-seq shown:
 
 ![preprocess pipeline](../_static/preprocess_pipeline.png)
 
-### Step 1: Download Required Tools
+## Step 1: Download Required Tools
 
 Before starting the alignment process, make sure to download and install the following tools:
 
@@ -17,12 +17,12 @@ Before starting the alignment process, make sure to download and install the fol
 [subset-bam](https://github.com/10XGenomics/subset-bam)
 
 [bamtools](https://github.com/pezmaster31/bamtools)
-### Step 2: Create a Reference Genome
+## Step 2: Create a Reference Genome
 
 Run the following command to generate a reference genome for alignment using STAR. 
 - `ensembl_mod_indx` is the directory where the reference genome index will be stored.
 - `Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa` can be downloaded [here](https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/dna/).
-- `Homo_sapiens.GRCh38.107.exon.gtf` is generated using the [file](./step0_generate_exon_gtf.ipynb).
+- `Homo_sapiens.GRCh38.107.exon.gtf` is generated using the [file](./step0_generate_exon_gtf_final.ipynb).
 
 
 ```bash
@@ -33,13 +33,13 @@ STAR --runMode genomeGenerate \
     --runThreadN 16
 ```
 
-### Step 3: Download the Raw RNA-Seq Files
+## Step 3: Download the Raw RNA-Seq Files
 
 Download the raw RNA-seq files from the provided sources. For the links to the human colon and rectum raw data, please refer to the original [study](https://rupress.org/jem/article/217/2/e20191130/132578/Single-cell-transcriptome-analysis-reveals). For the PDAC dataset, you can find it [here](https://www.nature.com/articles/s41422-019-0195-y).
 
 For 10X single-cell RNA-seq, we will first use Cell Ranger to generate the cell BAM file and extract the cell barcodes. Afterward, we will split the cell barcodes and process one cell at a time.
 
-### Step 4: Obtain Cell Barcodes and BAM File
+## Step 4: Obtain Cell Barcodes and BAM File
 
 Use Cell Ranger to align the data to the reference [genome](https://www.10xgenomics.com/support/software/cell-ranger/downloads) and generate the cell barcodes and BAM file.
 
@@ -51,7 +51,7 @@ cellranger count --id=T10_std_cellranger \
     --chemistry=SC3Pv2
 ```
 
-### Step 5: Subset BAM File to Retain Valid Cells with Cell Barcodes
+## Step 5: Subset BAM File to Retain Valid Cells with Cell Barcodes
 
 In this step, we will subset the BAM file to keep only the valid cells, 
 identified by their respective cell barcodes. 
@@ -66,14 +66,14 @@ subset-bam_linux --bam ./T10_std_cellranger/outs/possorted_genome_bam.bam \
 
 ```
 
-### Step 6: Split into Single-Cell BAM Files
+## Step 6: Split into Single-Cell BAM Files
 In this step, we will split the BAM file into individual single-cell BAM files, each corresponding to a specific cell barcode. This allows us to process and analyze one cell at a time in the subsequent steps.
 
 ```bash
 bamtools split -in /mnt/data/kailu/00_scExon/10_GO_PDAC/00_data_generation/02_single_std_bam/T10/PADC_sub_T10.bam -tag CB
 ```
 
-### Step7: STAR Alignment 
+## Step7: STAR Alignment 
 ```bash
 ## `ID_SAMPLE` is the Cell Barcode Name
 mkdir ./03_exon_star/${ID_SAMPLE}
@@ -95,7 +95,7 @@ STAR --runThreadN 16 \
     --outFileNamePrefix ./02_exon_std/${ID_SAMPLE}/${ID_SAMPLE}.std.
 ```
 
-### Step 8: Count Exon Reads and Junction Reads
+## Step 8: Count Exon Reads and Junction Reads
 
 Get exon gene count using the modified exon GTF file. This will generate the gene count (`${ID_SAMPLE}.exongene.count.txt`), which will be used later for HVG identification.
 

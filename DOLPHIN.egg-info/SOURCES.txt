@@ -2,9 +2,6 @@ LICENSE
 README.md
 setup.py
 DOLPHIN/__init__.py
-DOLPHIN/gtfpy.py
-DOLPHIN/preprocess_raw.py
-DOLPHIN/test.py
 DOLPHIN.egg-info/PKG-INFO
 DOLPHIN.egg-info/SOURCES.txt
 DOLPHIN.egg-info/dependency_links.txt
@@ -26,3 +23,6 @@ DOLPHIN/model/model.py
 DOLPHIN/model/run_model.py
 DOLPHIN/model/train.py
 DOLPHIN/model/utils.py
+DOLPHIN/preprocess/__init__.py
+DOLPHIN/preprocess/gtfpy.py
+DOLPHIN/preprocess/preprocess_raw.py

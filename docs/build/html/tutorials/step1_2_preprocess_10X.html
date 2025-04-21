@@ -47,13 +47,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting started with DOLPHIN:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="step0_generate_exon_gtf.html">Exon-Level Reference GTF File Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step0_generate_exon_gtf_final.html">Exon GTF Generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="step1_1_preprocess_full_length.html">Preprocessing Full-Length Single-Cell RNA-Seq for Exon and Junction Read Counts</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocessing 10X Single-Cell RNA-Seq for Exon and Junction Read Counts</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-download-required-tools">Step 1: Download Required Tools</a></li>
@@ -81,13 +78,7 @@
 <li class="toctree-l2"><a class="reference internal" href="step7_2_EDEG_analysis.html">Exon-Level Differential Gene Analysis Using Feature Matrix</a></li>
 </ul>
 </li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentations</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../API/index.html">API Documentations</a></li>
 </ul>
 
@@ -135,7 +126,7 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ensembl_mod_indx</span></code> is the directory where the reference genome index will be stored.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa</span></code> can be downloaded <a class="reference external" href="https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/dna/">here</a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Homo_sapiens.GRCh38.107.exon.gtf</span></code> is generated using the <a class="reference internal" href="step0_generate_exon_gtf.html"><span class="std std-doc">file</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Homo_sapiens.GRCh38.107.exon.gtf</span></code> is generated using the <a class="reference internal" href="step0_generate_exon_gtf_final.html"><span class="std std-doc">file</span></a>.</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>STAR<span class="w"> </span>--runMode<span class="w"> </span>genomeGenerate<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--genomeDir<span class="w"> </span>/mnt/data/kailu/STAR_example/ensembl_mod_indx/<span class="w"> </span><span class="se">\</span>

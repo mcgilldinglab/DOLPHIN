@@ -48,17 +48,8 @@
               <p class="caption" role="heading"><span class="caption-text">Getting started with DOLPHIN:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentations</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="API/index.html">API Documentations</a></li>
 </ul>
 
@@ -96,27 +87,37 @@ differential gene analysis at exon level, alternative splicing.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="usage.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage.html#example-data">Example data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#example-dataset">Example Dataset</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step0_generate_exon_gtf_final.html">Exon GTF Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step1_1_preprocess_full_length.html">Preprocessing Full-Length Single-Cell RNA-Seq for Exon and Junction Read Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step1_2_preprocess_10X.html">Preprocessing 10X Single-Cell RNA-Seq for Exon and Junction Read Counts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step2_1_graph_generation.html">Generate Feature Matrix and Adjacency Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step2_2_exonGene_matrix_generation.html">Generate Exon Gene h5ad and Select Highly Variable Genes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step2_3_feature_matrix_generation.html">Generate Feature Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step2_4_adjacency_matrix_generation.html">Generate Adjacency Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step2_5_graph_data_generation.html">Generate Graph Data for MODEl input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step3_run_DOLPHIN.html">Setup and Train the DOLPHIN Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step4_cell_aggregation.html">Cell Aggregation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step5_alternative_splicing.html">Detect Alternative Splicing Events with Outrigger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step6_alternative_splicing_analysis.html">Alternative Splicing Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step6_alternative_splicing_analysis.html#Generate-PSI-adata">Generate PSI adata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step6_alternative_splicing_analysis.html#Differential-Alternative-Splicing-Events">Differential Alternative Splicing Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step7_1_MAST.html">Run MAST to get Exon level p-value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/step7_2_EDEG_analysis.html">Exon-Level Differential Gene Analysis Using Feature Matrix</a></li>
 </ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/run_DOLPHIN.html">Run DOLPHIN Model on Full-length Dataset</a></li>
 </ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="API/index.html">API Documentations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="API/preprocess.html">DOLPHIN Preprocess Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="API/run_model.html">DOLPHIN Model module</a></li>
 </ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">API Documentations</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="API/index.html">API Documentations</a></li>
+</li>
 </ul>
 </div>
 </section>

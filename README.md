@@ -1,5 +1,7 @@
 <img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">
 
+Full documentation and tutorials are available at [DOLPHIN Docs](https://dolphin-sc.readthedocs.io/en/latest/).
+
 ## Overview
 <img title="DOLPHIN Overview" alt="Alt text" src="Overview_DOLPHIN.png">
 The advent of single-cell sequencing has revolutionized the study of cellular dynamics, providing unprecedented resolution into the molecular states and heterogeneity of individual cells. However, the rich potential of exon-level information and junction reads within single cells remains underutilized. Conventional gene-count methods overlook critical exon and junction data, limiting the quality of cell representation and downstream analyses such as subpopulation identification and alternative splicing detection. To address this, we introduce DOLPHIN, a deep learning method that integrates exon-level and junction read data, representing genes as graph structures. These graphs are processed by a variational autoencoder to improve cell embeddings. Compared to conventional gene-based methods, DOLPHIN shows superior performance in cell clustering, biomarker discovery, and alternative splicing detection, providing deeper insights into cellular processes. By examining cellular dynamics with enhanced resolution, DOLPHIN detects subtle differences often missed at the gene level, offering new insights into disease mechanisms and potential therapeutic targets.
@@ -18,31 +20,26 @@ Installing DOLPHIN directly from GitHub ensures you have the latest version.
 
 **Note:** This tool has been primarily tested on Linux-based systems. While it may run on other platforms, we recommend using a Linux environment for best compatibility and performance, especially for memory-intensive preprocessing steps such as STAR or Cell Ranger alignment. 
 
-```
+📥 Step 1: Clone the Repository
+```bash
 git clone https://github.com/mcgilldinglab/DOLPHIN.git
 cd DOLPHIN
 ```
 
-Creating and Activating the Conda Environment
-
-```
+🛠 Step 2: Create and Activate the Conda Environment
+```bash
 conda env create -f environment.yaml
 conda activate DOLPHIN
 ```
 
-Installing the DOLPHIN Package
-1. Standard Installation
-```
-pip install .
-```
-
-2. Developer Mode Installation
-```
+🧑‍💻 (Optional) Step 3: Developer Mode Installation
+```bash
 pip install -e .
 ```
 
-Validate That DOLPHIN Is Successfully Installed
-```
+✅ Step 4: Validate the Installation
+You can check if the package is correctly installed by opening Python and running:
+```bash
 import DOLPHIN
 ```
 

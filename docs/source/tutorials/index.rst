@@ -6,7 +6,7 @@ This section contains step-by-step tutorials for using the DOLPHIN tool.
 .. toctree::
     :maxdepth: 1
     
-    step0_generate_exon_gtf.ipynb
+    step0_generate_exon_gtf_final.ipynb
     step1_1_preprocess_full_length.md
     step1_2_preprocess_10X.md
     step2_1_graph_generation.ipynb

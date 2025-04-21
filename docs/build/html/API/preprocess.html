@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOLPHIN Preprocess Module &mdash; DOLPHIN  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DOLPHIN Model module" href="run_model.html" />
+    <link rel="prev" title="API Documentations" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DOLPHIN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting started with DOLPHIN:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Documentations</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">DOLPHIN Preprocess Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#main-function">Main Function</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#DOLPHIN.preprocess.generate_exon_gtf.generate_nonoverlapping_exons"><code class="docutils literal notranslate"><span class="pre">generate_nonoverlapping_exons()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#helper-functions">Helper Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#DOLPHIN.preprocess.generate_exon_gtf.prepare_exon_gtf"><code class="docutils literal notranslate"><span class="pre">prepare_exon_gtf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#DOLPHIN.preprocess.generate_exon_gtf.exon_uniq"><code class="docutils literal notranslate"><span class="pre">exon_uniq()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#DOLPHIN.preprocess.generate_exon_gtf.save_by_batch"><code class="docutils literal notranslate"><span class="pre">save_by_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#DOLPHIN.preprocess.generate_exon_gtf.combine_saved_batches"><code class="docutils literal notranslate"><span class="pre">combine_saved_batches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#DOLPHIN.preprocess.generate_exon_gtf.check_exon_overlap"><code class="docutils literal notranslate"><span class="pre">check_exon_overlap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#DOLPHIN.preprocess.generate_exon_gtf.save_gtf_outputs"><code class="docutils literal notranslate"><span class="pre">save_gtf_outputs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="run_model.html">DOLPHIN Model module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DOLPHIN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">API Documentations</a></li>
+      <li class="breadcrumb-item active">DOLPHIN Preprocess Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/API/preprocess.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dolphin-preprocess-module">
+<h1>DOLPHIN Preprocess Module<a class="headerlink" href="#dolphin-preprocess-module" title="Permalink to this heading"></a></h1>
+<p>This module provides functions for processing GTF files and generating non-overlapping exon annotations.</p>
+<section id="main-function">
+<h2>Main Function<a class="headerlink" href="#main-function" title="Permalink to this heading"></a></h2>
+<p>This is the recommended entry point for users.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="DOLPHIN.preprocess.generate_exon_gtf.generate_nonoverlapping_exons">
+<span class="sig-prename descclassname"><span class="pre">DOLPHIN.preprocess.generate_exon_gtf.</span></span><span class="sig-name descname"><span class="pre">generate_nonoverlapping_exons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_gtf_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DOLPHIN/preprocess/generate_exon_gtf.html#generate_nonoverlapping_exons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DOLPHIN.preprocess.generate_exon_gtf.generate_nonoverlapping_exons" title="Permalink to this definition"></a></dt>
+<dd><p>End-to-end pipeline to process an Ensembl GTF file and generate non-overlapping exons per gene.</p>
+<p>This function performs the following steps:
+1. Load and filter exon features from a GTF file.
+2. Remove duplicate exons (by gene_id, start, end).
+3. Process each gene to merge overlapping exons using IntervalTree.
+4. Save intermediate results in batches.
+5. Combine all batches into a final exon DataFrame.
+6. Optionally check for residual overlaps.
+7. Save the final results in GTF and Pickle formats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_gtf_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to the input Ensembl-format GTF file.</p></li>
+<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Directory to save intermediate and final output files.</p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of genes to process and save per batch (default: 10000).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>gtf_all</strong> (<em>pd.DataFrame</em>) – Final merged and cleaned exon annotation table.</p></li>
+<li><p><strong>overlap_issues</strong> (<em>pd.DataFrame</em>) – DataFrame of overlapping exons detected post-processing (if any).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="helper-functions">
+<h2>Helper Functions<a class="headerlink" href="#helper-functions" title="Permalink to this heading"></a></h2>
+<p>The following functions support different steps of the GTF processing pipeline. Advanced users may call these directly.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="DOLPHIN.preprocess.generate_exon_gtf.prepare_exon_gtf">
+<span class="sig-prename descclassname"><span class="pre">DOLPHIN.preprocess.generate_exon_gtf.</span></span><span class="sig-name descname"><span class="pre">prepare_exon_gtf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_gtf_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DOLPHIN/preprocess/generate_exon_gtf.html#prepare_exon_gtf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DOLPHIN.preprocess.generate_exon_gtf.prepare_exon_gtf" title="Permalink to this definition"></a></dt>
+<dd><p>Load an Ensembl GTF file and extract exon-level annotations with unique start/end per gene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_gtf_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to the original Ensembl .gtf file.</p></li>
+<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Directory to save intermediate results (default: ‘./dolphin_exon_gtf/’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>df_exon_nodup</strong> – Filtered exon annotation table with duplicates (same gene_id, start, end) removed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DOLPHIN.preprocess.generate_exon_gtf.exon_uniq">
+<span class="sig-prename descclassname"><span class="pre">DOLPHIN.preprocess.generate_exon_gtf.</span></span><span class="sig-name descname"><span class="pre">exon_uniq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_exon_nodup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DOLPHIN/preprocess/generate_exon_gtf.html#exon_uniq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DOLPHIN.preprocess.generate_exon_gtf.exon_uniq" title="Permalink to this definition"></a></dt>
+<dd><p>Merge overlapping exons for a single gene using interval trees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_exon_nodup</strong> (<em>pandas.DataFrame</em>) – DataFrame containing all exons (from <cite>prepare_exon_gtf</cite>), including gene IDs and coordinates.</p></li>
+<li><p><strong>gene</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The gene ID whose exons will be processed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A cleaned exon DataFrame for the given gene, where overlapping exons are merged,
+exon coordinates are updated, and exon numbers are reindexed. Exons that are
+invalid or cannot be matched to any merged region are excluded.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DOLPHIN.preprocess.generate_exon_gtf.save_by_batch">
+<span class="sig-prename descclassname"><span class="pre">DOLPHIN.preprocess.generate_exon_gtf.</span></span><span class="sig-name descname"><span class="pre">save_by_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_exon_nodup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DOLPHIN/preprocess/generate_exon_gtf.html#save_by_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DOLPHIN.preprocess.generate_exon_gtf.save_by_batch" title="Permalink to this definition"></a></dt>
+<dd><p>Process exon annotations for each gene in batches and save results as serialized .pkl files.</p>
+<p>This function applies <cite>exon_uniq()</cite> to each gene in the input DataFrame and saves the processed
+exon data in batches. Each batch contains up to <cite>save_num</cite> genes and is written to a pickle file.
+A log file is generated to record processing status and potential errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_exon_nodup</strong> (<em>pandas.DataFrame</em>) – DataFrame containing filtered exon annotations (typically from <cite>prepare_exon_gtf</cite>).</p></li>
+<li><p><strong>save_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of genes to include per output batch file (default is 10,000).</p></li>
+<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Path to the output directory where batch <cite>.pkl</cite> files and the log file will be stored
+(default is “./”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>This function writes intermediate results to disk but does not return any object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DOLPHIN.preprocess.generate_exon_gtf.combine_saved_batches">
+<span class="sig-prename descclassname"><span class="pre">DOLPHIN.preprocess.generate_exon_gtf.</span></span><span class="sig-name descname"><span class="pre">combine_saved_batches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'df_exon_gtf_'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DOLPHIN/preprocess/generate_exon_gtf.html#combine_saved_batches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DOLPHIN.preprocess.generate_exon_gtf.combine_saved_batches" title="Permalink to this definition"></a></dt>
+<dd><p>Combine multiple saved exon batch files into a single concatenated DataFrame.</p>
+<p>This function reads all <cite>.pkl</cite> files in the specified folder that start with the given prefix,
+concatenates them in order, and returns a single DataFrame containing all exon records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Directory where batch <cite>.pkl</cite> files are stored.
+Default is “./”, which typically points to the parent of “dolphin_exon_gtf/temp”.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Filename prefix used to identify batch <cite>.pkl</cite> files.
+Default is <code class="docutils literal notranslate"><span class="pre">df_exon_gtf_</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A single DataFrame containing concatenated exon entries from all batch files.
+The rows are ordered according to batch and file sorting.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DOLPHIN.preprocess.generate_exon_gtf.check_exon_overlap">
+<span class="sig-prename descclassname"><span class="pre">DOLPHIN.preprocess.generate_exon_gtf.</span></span><span class="sig-name descname"><span class="pre">check_exon_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gtf_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_gene_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DOLPHIN/preprocess/generate_exon_gtf.html#check_exon_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DOLPHIN.preprocess.generate_exon_gtf.check_exon_overlap" title="Permalink to this definition"></a></dt>
+<dd><p>Check for overlapping adjacent exon intervals within each gene.</p>
+<p>This function checks whether any exons within the same gene have overlapping intervals,
+based on their <cite>start</cite> and <cite>end</cite> positions. Optionally, it compares the set of gene IDs
+in the provided DataFrame with an expected list to detect any missing or extra genes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gtf_df</strong> (<em>pandas.DataFrame</em>) – A DataFrame containing exon annotations with at least the columns: ‘gene_id’, ‘start’, and ‘end’.</p></li>
+<li><p><strong>expected_gene_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – A list of expected gene IDs used to validate that all genes were processed and included in <cite>gtf_df</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame containing exon entries that overlap with their adjacent exons within the same gene.
+The result may be empty if no overlaps are detected.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DOLPHIN.preprocess.generate_exon_gtf.save_gtf_outputs">
+<span class="sig-prename descclassname"><span class="pre">DOLPHIN.preprocess.generate_exon_gtf.</span></span><span class="sig-name descname"><span class="pre">save_gtf_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gtf_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dolphin.exon'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/DOLPHIN/preprocess/generate_exon_gtf.html#save_gtf_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DOLPHIN.preprocess.generate_exon_gtf.save_gtf_outputs" title="Permalink to this definition"></a></dt>
+<dd><p>Save the final exon DataFrame to both GTF and Pickle formats.</p>
+<p>This function writes the given exon annotation table to two output files:
+one in standard GTF format, and the other as a serialized Python pickle (.pkl).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gtf_df</strong> (<em>pandas.DataFrame</em>) – The exon annotation DataFrame to be saved.</p></li>
+<li><p><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Directory where the output files will be saved (default is the current directory).</p></li>
+<li><p><strong>base_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Filename prefix used for both output files (default is “dolphin.exon”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>&lt;output_dir&gt;/dolphin_exon_gtf/&lt;base_name&gt;.gtf : GTF-format annotation file
+&lt;output_dir&gt;/dolphin_exon_gtf/&lt;base_name&gt;.pkl : Pickle-serialized DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="API Documentations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="run_model.html" class="btn btn-neutral float-right" title="DOLPHIN Model module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ding Lab at McGill University.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

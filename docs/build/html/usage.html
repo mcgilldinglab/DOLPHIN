@@ -49,24 +49,12 @@
               <p class="caption" role="heading"><span class="caption-text">Getting started with DOLPHIN:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-dataset">Example Dataset</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#example-data">Example data</a></li>
-</ul>
-</li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentations</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="API/index.html">API Documentations</a></li>
 </ul>
 
@@ -98,34 +86,34 @@
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h1>
 <section id="installation">
 <span id="id1"></span><h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p><strong>Note:</strong> This tool has been primarily tested on Linux-based systems. While it may run on other platforms, we recommend using a Linux environment for best compatibility and performance—especially for memory-intensive preprocessing steps such as STAR or Cell Ranger alignment.</p>
 <p>Install from Github</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">  </span>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mcgilldinglab/DOLPHIN.git
-<span class="w">  </span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>DOLPHIN
+<p>📥 Step 1: Clone the Repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mcgilldinglab/DOLPHIN.git
+<span class="nb">cd</span><span class="w"> </span>DOLPHIN
 </pre></div>
 </div>
-<p>Create a conda environment using provided yaml file</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">  </span>$<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yaml
-<span class="w">  </span>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>DOLPHIN
+<p>🛠 Step 2: Create and Activate the Conda Environment</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yaml
+conda<span class="w"> </span>activate<span class="w"> </span>DOLPHIN
 </pre></div>
 </div>
-<section id="prerequisites">
-<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this heading"></a></h3>
-<p>Align raw RNA-seq dataset and count the exon reads and junction reads</p>
-<ul class="simple">
-<li><p>STAR &gt;= 2.7.3a</p></li>
-<li><p>cellranger &gt;= 7.0.1</p></li>
-<li><p>featurecounts</p></li>
-</ul>
+<p>🧑‍💻 (Optional) Step 3: Developer Mode Installation</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+<p>✅ Step 4: Validate the Installation
+You can check if the package is correctly installed by opening Python and running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>import<span class="w"> </span>DOLPHIN
+</pre></div>
+</div>
 </section>
-</section>
-<section id="example-data">
-<h2>Example data<a class="headerlink" href="#example-data" title="Permalink to this heading"></a></h2>
-<ul class="simple">
-<li><p>For quick test on the python packages succeffully installed, please download test dataset: <a class="reference external" href="https://outlook.office.com/host/377c982d-9686-450e-9a7c-22aeaf1bc162/7211f19f-262a-42eb-a02e-289956491741">One Drive.</a>.</p></li>
-<li><p>For run the tutorial and reproduce the results in the manuscripts, please download the processed dataset here: <a class="reference external" href="https://outlook.office.com/host/377c982d-9686-450e-9a7c-22aeaf1bc162/7211f19f-262a-42eb-a02e-289956491741">One Drive.</a></p></li>
-</ul>
+<section id="example-dataset">
+<h2>Example Dataset<a class="headerlink" href="#example-dataset" title="Permalink to this heading"></a></h2>
+<p>You can download the processed dataset from <a class="reference external" href="https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=VBn7KG">One Drive.</a>
+and follow the <a class="reference internal" href="examples/run_DOLPHIN.html"><span class="doc std std-doc">example tutorial.</span></a></p>
 <p><strong>Required files</strong></p>
-<p>For human alignment to the exon level, please download the pre-processed gtf file here:<a class="reference external" href="https://outlook.office.com/host/377c982d-9686-450e-9a7c-22aeaf1bc162/7211f19f-262a-42eb-a02e-289956491741">One Drive.</a>.</p>
+<p>For human alignment to the exon level, please download the pre-processed gtf file here:<a class="reference external" href="https://outlook.office.com/host/377c982d-9686-450e-9a7c-22aeaf1bc162/7211f19f-262a-42eb-a02e-289956491741">One Drive.</a></p>
 </section>
 </section>
 

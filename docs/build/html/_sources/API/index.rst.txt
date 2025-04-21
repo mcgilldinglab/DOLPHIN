@@ -1,5 +1,5 @@
 API Documentations
-=================
+===================
 
 Documentaions for the DOLPHIN package.
 
@@ -7,4 +7,5 @@ Documentaions for the DOLPHIN package.
    :maxdepth: 1
    :caption: API Modules
 
+   preprocess
    run_model

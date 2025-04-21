@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Preprocessing 10X Single-Cell RNA-Seq for Exon and Junction Read Counts" href="step1_2_preprocess_10X.html" />
-    <link rel="prev" title="Exon-Level Reference GTF File Generation" href="step0_generate_exon_gtf.html" /> 
+    <link rel="prev" title="Exon GTF Generation" href="step0_generate_exon_gtf_final.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,13 +47,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting started with DOLPHIN:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="step0_generate_exon_gtf.html">Exon-Level Reference GTF File Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="step0_generate_exon_gtf_final.html">Exon GTF Generation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Preprocessing Full-Length Single-Cell RNA-Seq for Exon and Junction Read Counts</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#step-1-download-required-tools">Step 1: Download Required Tools</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-2-create-a-reference-genome">Step 2: Create a Reference Genome</a></li>
@@ -79,13 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="step7_2_EDEG_analysis.html">Exon-Level Differential Gene Analysis Using Feature Matrix</a></li>
 </ul>
 </li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Documentations</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="../API/index.html">API Documentations</a></li>
 </ul>
 
@@ -132,7 +123,7 @@
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ensembl_mod_indx</span></code> is the directory where the reference genome index will be stored.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa</span></code> can be downloaded <a class="reference external" href="https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/dna/">here</a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Homo_sapiens.GRCh38.107.exon.gtf</span></code> is generated using the <a class="reference internal" href="step0_generate_exon_gtf.html"><span class="std std-doc">file</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Homo_sapiens.GRCh38.107.exon.gtf</span></code> is generated using the <a class="reference internal" href="step0_generate_exon_gtf_final.html"><span class="std std-doc">file</span></a>.</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>STAR<span class="w"> </span>--runMode<span class="w"> </span>genomeGenerate<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--genomeDir<span class="w"> </span>/mnt/data/kailu/STAR_example/ensembl_mod_indx/<span class="w"> </span><span class="se">\</span>
@@ -206,7 +197,7 @@ featureCounts<span class="w"> </span>-t<span class="w"> </span>exon<span class="
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="step0_generate_exon_gtf.html" class="btn btn-neutral float-left" title="Exon-Level Reference GTF File Generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="step0_generate_exon_gtf_final.html" class="btn btn-neutral float-left" title="Exon GTF Generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="step1_2_preprocess_10X.html" class="btn btn-neutral float-right" title="Preprocessing 10X Single-Cell RNA-Seq for Exon and Junction Read Counts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
