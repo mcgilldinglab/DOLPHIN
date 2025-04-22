@@ -1,6 +1,10 @@
-<img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">
+# DOLPHIN
+
+DOLPHIN: Deep Exon-level Graph Neural Network for Single-cell Representation Learning and Alternative Splicing
 
 Full documentation and tutorials are available at [DOLPHIN Docs](https://dolphin-sc.readthedocs.io/en/latest/).
+
+<img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">
 
 ## Overview
 <img title="DOLPHIN Overview" alt="Alt text" src="Overview_DOLPHIN.png">
