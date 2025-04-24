@@ -38,7 +38,7 @@ cd DOLPHIN
 
 🛠 Step 2: Create and Activate the Conda Environment
 ```bash
-conda env create -f environment.yaml
+conda env create -f environment_linux.yaml
 conda activate DOLPHIN
 ```
 
@@ -55,6 +55,10 @@ import DOLPHIN
 ---
 
 ### 🍎 Option 2: macOS Installation (CPU-only)
+```bash
+conda env create -f environment_mac.yaml
+conda activate DOLPHIN
+```
 
 ## Tutorials:
 
