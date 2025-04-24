@@ -20,10 +20,15 @@ The advent of single-cell sequencing has revolutionized the study of cellular dy
 ## Installation
 
 Installing DOLPHIN directly from GitHub ensures you have the latest version. 
-**(Please install directly from GitHub to use the provided Jupyter notebooks for tutorials)**
 
-**Note:** This tool has been primarily tested on Linux-based systems. While it may run on other platforms, we recommend using a Linux environment for best compatibility and performance, especially for memory-intensive preprocessing steps such as STAR or Cell Ranger alignment. 
+### 🧠 Platform Notes
 
+**Note:** This tool has been primarily tested on Linux-based systems, specifically Ubuntu 22.04.4 LTS. While it may run on other platforms, we recommend using a **Linux environment** for best compatibility and performance, especially for memory-intensive preprocessing steps such as **STAR** or **Cell Ranger** alignment.
+
+⚠️ **macOS users:** DOLPHIN is also compatible with macOS (including Apple Silicon), but **GPU acceleration is not supported** because CUDA is unavailable on this platform. All computations will run in **CPU-only mode**.
+---
+
+### 💻 Option 1: Linux Installation (Recommended)
 📥 Step 1: Clone the Repository
 ```bash
 git clone https://github.com/mcgilldinglab/DOLPHIN.git
@@ -46,6 +51,9 @@ You can check if the package is correctly installed by opening Python and runnin
 ```bash
 import DOLPHIN
 ```
+---
+
+### 🍎 Option 2: macOS Installation (CPU-only)
 
 ## Tutorials:
 
