@@ -3,10 +3,15 @@
 (installation)=
 ## Installation
 
-**Note:** This tool has been primarily tested on Linux-based systems. While it may run on other platforms, we recommend using a Linux environment for best compatibility and performance—especially for memory-intensive preprocessing steps such as STAR or Cell Ranger alignment.
+### 🧠 Platform Notes
 
-Install from Github
+**Note:** This tool has been primarily tested on Linux-based systems, specifically Ubuntu 22.04.4 LTS. While it may run on other platforms, we recommend using a **Linux environment** for best compatibility and performance, especially for memory-intensive preprocessing steps such as **STAR** or **Cell Ranger** alignment.
 
+>⚠️ **macOS users:** DOLPHIN is also compatible with macOS (Tested on macOS Ventura 13.0.1 with Apple M1), but **GPU acceleration is not supported** because CUDA is unavailable on this platform. All computations will run in **CPU-only mode**.
+
+---
+
+### 💻 Option 1: Linux Installation (Recommended)
 📥 Step 1: Clone the Repository
 ```bash
 git clone https://github.com/mcgilldinglab/DOLPHIN.git
@@ -15,7 +20,7 @@ cd DOLPHIN
 
 🛠 Step 2: Create and Activate the Conda Environment
 ```bash
-conda env create -f environment.yaml
+conda env create -f environment_linux.yaml
 conda activate DOLPHIN
 ```
 
@@ -27,7 +32,14 @@ pip install -e .
 ✅ Step 4: Validate the Installation
 You can check if the package is correctly installed by opening Python and running:
 ```bash
-import DOLPHIN
+import DOLPHIN.model
+```
+---
+
+### 🍎 Option 2: macOS Installation (CPU-only)
+```bash
+conda env create -f environment_mac.yaml
+conda activate DOLPHIN
 ```
 
 ## Example Dataset
