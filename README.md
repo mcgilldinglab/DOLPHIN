@@ -50,7 +50,7 @@ pip install -e .
 ✅ Step 4: Validate the Installation
 You can check if the package is correctly installed by opening Python and running:
 ```bash
-import DOLPHIN
+import DOLPHIN.model
 ```
 ---
 
