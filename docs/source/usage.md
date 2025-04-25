@@ -24,7 +24,12 @@ conda env create -f environment_linux.yaml
 conda activate DOLPHIN
 ```
 
-🧑‍💻 (Optional) Step 3: Developer Mode Installation
+📦 Step 3: Install the DOLPHIN Python Package
+```bash
+pip install .
+```
+
+🧑‍💻 (Optional) Developer Mode Installation
 ```bash
 pip install -e .
 ```
