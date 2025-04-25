@@ -37,6 +37,7 @@ import DOLPHIN.model
 ---
 
 ### 🍎 Option 2: macOS Installation (CPU-only)
+Other steps are the same as in the Linux installation. Only Step 2 differs.
 ```bash
 conda env create -f environment_mac.yaml
 conda activate DOLPHIN
