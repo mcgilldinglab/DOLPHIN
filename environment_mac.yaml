@@ -3,7 +3,6 @@ channels:
 - conda-forge
 - defaults
 dependencies:
-- _libgcc_mutex=0.1
 - asttokens=2.0.5
 - bzip2=1.0.8
 - ca-certificates=2025.1.31
@@ -17,7 +16,6 @@ dependencies:
 - jedi=0.19.1
 - jupyter_client=8.6.0
 - jupyter_core=5.7.2
-- ld_impl_linux-64=2.40
 - libffi=3.4.4
 - libsodium=1.0.18
 - libuuid=1.41.5
