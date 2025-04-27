@@ -8,6 +8,7 @@ import gc
 
 def get_graph_input(pbar, start_idx, sample_num, output_path, output_name, celltypename=None, mapper=None):
     #convert adjacency matrix to row and columns
+    adata_adj_raw = anndata.read_h5ad(os.path.join(output_path, "AdjacencyCompReHvg_" + output_name+"_raw.h5ad"))
     adata_adj = anndata.read_h5ad(os.path.join(output_path, "AdjacencyCompReHvg_" + output_name+".h5ad"))
     adata_fea = anndata.read_h5ad(os.path.join(output_path, "FeatureCompHvg_" + output_name+".h5ad"))
 
@@ -42,7 +43,7 @@ def get_graph_input(pbar, start_idx, sample_num, output_path, output_name, cellt
         _fea = adata_fea[sample_list[sample_idx],:].X
         cell_x = torch.tensor(np.reshape(_fea, (-1,1)), dtype=torch.float32)
 
-        _adj = adata_adj[sample_list[sample_idx],:].X
+        _adj = adata_adj_raw[sample_list[sample_idx],:].X
 
         #### edge index and weight
         cell_edge = np.array([[],[]])

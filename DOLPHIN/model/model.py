@@ -13,7 +13,7 @@ Define VAE model
 pyro.distributions.enable_validation(False)
 pyro.set_rng_seed(0)
 
-print('im here aaaaa')
+print('im here aaaaa2')
 # Gat layers +encoder
 class Gra_Encoder(nn.Module):
     def __init__(self, in_node_fea, gat_channel, nhead, gat_dropout, concat, in_fea, hidden_dim, z_dim, p_dropout):
