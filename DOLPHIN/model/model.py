@@ -13,6 +13,7 @@ Define VAE model
 pyro.distributions.enable_validation(False)
 pyro.set_rng_seed(0)
 
+print('im here aaaaa')
 # Gat layers +encoder
 class Gra_Encoder(nn.Module):
     def __init__(self, in_node_fea, gat_channel, nhead, gat_dropout, concat, in_fea, hidden_dim, z_dim, p_dropout):
@@ -73,8 +74,7 @@ class Gra_Encoder(nn.Module):
         x_gat_conv = x.reshape(batch, -1)
         
         #encoder
-        x_gat_ln = torch.log(1 + x_gat_conv) #for data steability
-        fea_out = self.encoder(x_gat_ln)
+        fea_out = self.encoder(x_gat_conv)
 
         #mu and variance
         z_loc = self.fc_mu(fea_out) # mean

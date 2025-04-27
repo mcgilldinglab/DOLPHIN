@@ -73,8 +73,8 @@ class Gra_Encoder(nn.Module):
         x_gat_conv = x.reshape(batch, -1)
         
         #encoder
-        x_gat_ln = torch.log(1 + x_gat_conv) #for data steability
-        fea_out = self.encoder(x_gat_ln)
+        # x_gat_ln = torch.log(1 + x_gat_conv) #for data steability
+        fea_out = self.encoder(x_gat_conv)
 
         #mu and variance
         z_loc = self.fc_mu(fea_out) # mean
@@ -176,7 +176,7 @@ class VAE(nn.Module):
 
         === adjacency decoder
         in_adj: original adjacency vector size
-        list_adj_dec_hid: feature decoder hidden layer list
+        list_adj_dec_hid: adjacency decoder hidden layer list
 
         === lambdas
         kl_beta: factor scale the kl divergence

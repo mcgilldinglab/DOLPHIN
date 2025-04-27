@@ -10,7 +10,58 @@ The main function, hyperparameter search
 """
 
 def run_DOLPHIN(data_type, graph_in, fea_in, current_out_path='./', params=None, device='cuda:0', seed_num=0):
-    # print(seed_num)
+    
+    """
+    Run the DOLPHIN model on single-cell RNA-seq data to obtain latent cell embeddings.
+
+    Parameters
+    ----------
+    data_type : str
+        Specifies the type of input single-cell RNA-seq data.
+        - "full-length": For full-length RNA-seq data.
+        - "10x": For 10x Genomics RNA-seq data.
+
+    graph_in : object
+        The input graph structure (precomputed from exon-level data).
+
+    fea_in : anndata.AnnData
+        The input feature matrix, provided as an AnnData object.
+
+    current_out_path : str, optional
+        Output directory where the resulting cell embeddings will be saved.
+        The embeddings will be written to `DOLPHIN_Z.h5ad`. Default is `'./'`.
+
+    params : dict, optional
+        A dictionary of model hyperparameters. If not provided, default parameters will be used
+        depending on `data_type`. Customizable parameters include:
+
+        - "gat_channel"       : Number of GAT output channels per head.
+        - "nhead"             : Number of GAT attention heads.
+        - "gat_dropout"       : Dropout rate in the GAT layer.
+        - "list_gra_enc_hid"  : Encoder MLP hidden layer sizes.
+        - "gra_p_dropout"     : Dropout rate in the encoder.
+        - "z_dim"             : Dimensionality of the latent space.
+        - "list_fea_dec_hid"  : Feature decoder MLP hidden layer sizes.
+        - "list_adj_dec_hid"  : Adjacency decoder MLP hidden layer sizes.
+        - "lr"                : Learning rate.
+        - "batch"             : Mini-batch size.
+        - "epochs"            : Number of training epochs.
+        - "kl_beta"           : KL divergence loss weight.
+        - "fea_lambda"        : Feature reconstruction loss weight.
+        - "adj_lambda"        : Adjacency reconstruction loss weight.
+
+    device : str, optional
+        Device to run the model on. Default is `'cuda:0'` (recommended for GPU acceleration).
+
+    seed_num : int, optional
+        Random seed for reproducibility. Default is `0`.
+
+    Returns
+    -------
+    None
+        Saves the latent cell embedding matrix to `DOLPHIN_Z.h5ad` under `current_out_path`.
+    """
+    
     random.seed(seed_num)
     os.environ['PYTHONHASHSEED'] = str(seed_num)
     np.random.seed(seed_num)
