@@ -7,4 +7,6 @@ Running DOLPHIN on the example dataset, please download example dataset here:
 .. toctree::
     :maxdepth: 1
     
-    run_DOLPHIN.ipynb
+    run_DOLPHIN_flashseq.ipynb
+    run_DOLPHIN_10x_colon.ipynb
+    run_DOLPHIN_pdac.ipynb
