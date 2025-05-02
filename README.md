@@ -60,7 +60,8 @@ import DOLPHIN.model
 ---
 
 ### 🍎 Option 2: macOS Installation (CPU-only)
-Other steps are the same as in the Linux installation. Only Step 2 differs.
+Other steps are the same as in the Linux installation. Only Step 2 differs. Once Step 2 is complete, resume from **Step 3** of the Linux installation to finish the setup.
+
 
 ```bash
 conda env create -f environment_mac.yaml
