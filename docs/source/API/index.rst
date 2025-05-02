@@ -8,4 +8,6 @@ Documentaions for the DOLPHIN package.
    :caption: API Modules
 
    preprocess
+   graph_generation
    run_model
+   cell_aggregation
