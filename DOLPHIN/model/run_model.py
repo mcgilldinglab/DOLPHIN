@@ -9,8 +9,7 @@ import random
 The main function, hyperparameter search
 """
 
-def run_DOLPHIN(data_type, graph_in, fea_in, current_out_path='./', params=None, device='cuda:0', seed_num=0):
-    
+def run_DOLPHIN(data_type, graph_in, fea_in, current_out_path='./', params=None, device='auto', seed_num=0):
     """
     Run the DOLPHIN model on single-cell RNA-seq data to obtain latent cell embeddings.
 
@@ -51,7 +50,13 @@ def run_DOLPHIN(data_type, graph_in, fea_in, current_out_path='./', params=None,
         - "adj_lambda"        : Adjacency reconstruction loss weight.
 
     device : str, optional
-        Device to run the model on. Default is `'cuda:0'` (recommended for GPU acceleration).
+        Computational device to run the model on. Options are:
+        
+        - `'auto'` (default): Automatically selects `'cuda'` if a GPU is available, otherwise falls back to `'cpu'`.
+        - `'cuda'` or `'cuda:0'`: Use the first available GPU.
+        - `'cpu'`: Run on CPU only.
+
+        GPU acceleration is recommended for large datasets or faster training.
 
     seed_num : int, optional
         Random seed for reproducibility. Default is `0`.
@@ -121,6 +126,10 @@ def run_DOLPHIN(data_type, graph_in, fea_in, current_out_path='./', params=None,
         params = default_params
 
     # print(params)
-    
-    run_train(graph_in, fea_in, current_out_path, params, device='cuda')
+    if device == 'auto':
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    print(f"[DOLPHIN] Training on device: {device.upper()} ({'GPU' if 'cuda' in device else 'CPU'})")
+
+    run_train(graph_in, fea_in, current_out_path, params, device=device)
 

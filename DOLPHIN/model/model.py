@@ -293,7 +293,8 @@ def define_svi(in_node_fea, in_fea, in_adj, params, device, pretrain_path_fea = 
               )
     
     # put the vae model in gpu
-    vae.cuda(device)
+    # vae.cuda(device)
+    vae.to(device)
     vae.train()
 
     # setup the optimizer

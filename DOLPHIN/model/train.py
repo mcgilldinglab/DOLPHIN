@@ -15,10 +15,9 @@ Define training process
 def train_step(svi, train_loader, device):
     epoch_loss = 0.
     for x_gra in train_loader:
-        if "cuda" in device:
-            x_gra = x_gra.cuda(device)
+        # if "cuda" in device:
+        x_gra = x_gra.to(device)
         epoch_loss += svi.step(x_gra)
-
     normalizer_train = len(train_loader.dataset)
     total_epoch_loss_train = epoch_loss / normalizer_train
     return total_epoch_loss_train
