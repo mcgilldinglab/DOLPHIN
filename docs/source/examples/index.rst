@@ -8,3 +8,5 @@ This section provides examples demonstrating how to run the DOLPHIN model, perfo
     run_DOLPHIN_flashseq.ipynb
     run_DOLPHIN_10x_colon.ipynb
     run_DOLPHIN_pdac.ipynb
+    PDAC_EDEG.ipynb
+    Differential_AS_analysis.ipynb

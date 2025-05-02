@@ -1,7 +1,6 @@
 DOLPHIN Cell Aggregation Module
 ===================================
 
-This module provides functions for processing GTF files and generating non-overlapping exon annotations.
+This module provides a cell aggregation method that enhances junction read counts by incorporating information from neighboring cells using majority voting.
 
-Main Function
--------------
+.. autofunction:: DOLPHIN.cell_aggregation_mj.aggregate_and_normalize_bam

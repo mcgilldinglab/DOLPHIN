@@ -11,3 +11,5 @@ Documentaions for the DOLPHIN package.
    graph_generation
    run_model
    cell_aggregation
+   as_analysis
+   edeg_analysis
