@@ -9,6 +9,7 @@ This section contains step-by-step tutorials for using the DOLPHIN tool.
     step0_generate_exon_gtf_final.ipynb
     step1_1_preprocess_full_length.md
     step1_2_preprocess_10X.md
+    step1_2_preprocess_long_read.md
     step2_1_graph_generation.ipynb
     step2_2_exonGene_matrix_generation.ipynb
     step2_3_feature_matrix_generation.ipynb
