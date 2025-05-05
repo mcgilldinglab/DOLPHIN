@@ -1,6 +1,6 @@
-# Preprocessing 10X Single-Cell RNA-Seq for Exon and Junction Read Counts
+# Preprocessing Long-read Single-Cell RNA-Seq for Exon and Junction Read Counts
 
-Here is the brief pipeline for full-length and 10x single-cell RNA-seq shown:
+Here is the brief pipeline for long-read single-cell RNA-seq shown:
 
 ![preprocess pipeline](../_static/preprocess_pipeline_long.png)
 
