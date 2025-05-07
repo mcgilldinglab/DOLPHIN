@@ -20,14 +20,14 @@ optional:
 Run the following command to generate a reference genome for alignment using STAR. 
 - `ensembl_mod_indx` is the directory where the reference genome index will be stored.
 - `Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa` can be downloaded [here](https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/dna/).
-- `Homo_sapiens.GRCh38.107.exon.gtf` is generated using the [file](./step0_generate_exon_gtf_final.ipynb).
+- `dolphin_exon_gtf.gtf` is generated using the [file](./step0_generate_exon_gtf_final.ipynb).
 
 
 ```bash
 STAR --runMode genomeGenerate \
-    --genomeDir /mnt/data/kailu/STAR_example/ensembl_mod_indx/ \
+    --genomeDir ./ensembl_mod_indx/ \
     --genomeFastaFiles Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa \
-    --sjdbGTFfile Homo_sapiens.GRCh38.107.exon.gtf \
+    --sjdbGTFfile ./dolphin_exon_gtf/dolphin_exon_gtf.gtf \
     --runThreadN 16
 ```
 
@@ -72,7 +72,7 @@ Get exon gene count using the modified exon GTF file. This will generate the gen
 ```bash
 mkdir ./04_exon_gene_cnt
 featureCounts -t exon -O -M \
-    -a Homo_sapiens.GRCh38.107.exon.gtf \
+    -a ./dolphin_exon_gtf/dolphin_exon_gtf.gtf \
     -o ./04_exon_gene_cnt/${ID_SAMPLE}.exongene.count.txt \
     ./03_exon_star/${ID_SAMPLE}/${ID_SAMPLE}.Aligned.sortedByCoord.out.bam
 ```
@@ -84,7 +84,7 @@ Run the following command to get the exon and junction counts. This step will ge
 ```bash
 mkdir ./05_exon_junct_cnt
 featureCounts -t exon -f -O -J -M \
-    -a Homo_sapiens.GRCh38.107.exon.gtf \
+    -a ./dolphin_exon_gtf/dolphin_exon_gtf.gtf \
     -o ./05_exon_junct_cnt/${ID_SAMPLE}.exon.count.txt \
     ./03_exon_star/${ID_SAMPLE}/${ID_SAMPLE}.Aligned.sortedByCoord.out.bam
 ```

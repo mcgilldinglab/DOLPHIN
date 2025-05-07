@@ -72,7 +72,7 @@ conda activate DOLPHIN
 
 ### Dataset Preparation
 
-1. First, generate the exon-level reference GTF file by following the instructions in the [exon_gtf_generation](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step0_generate_exon_gtf.ipynb) tutorial.
+1. First, generate the exon-level reference GTF file by following the instructions in the [exon_gtf_generation](./docs/source/tutorials/step0_generate_exon_gtf_final.ipynb) tutorial.
 
 2. Then, use the following tutorials to align the raw RNA-seq data and generate exon read counts and junction read counts:
 
