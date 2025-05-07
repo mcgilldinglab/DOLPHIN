@@ -76,18 +76,18 @@ conda activate DOLPHIN
 
 2. Then, use the following tutorials to align the raw RNA-seq data and generate exon read counts and junction read counts:
 
-   - For **Full-length scRNA-seq**, refer to the [Full-length scRNA-seq tutorial](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step1_1_preprocess_full_length.md).
+   - For **Full-length scRNA-seq**, refer to the [Full-length scRNA-seq tutorial](./docs/source/tutorials/step1_1_preprocess_full_length.md).
 
-   - For **10X RNA-seq**, refer to the [10X tutorial](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step1_2_preprocess_10X.md).
+   - For **10X RNA-seq**, refer to the [10X tutorial](./docs/source/tutorials/step1_2_preprocess_10X.md).
      
 3. After aligning the RNA-seq data, generate the **feature matrix** and **adjacency matrix** using the provided [methods](https://github.com/mcgilldinglab/DOLPHIN/tree/main/tutorial) in the tutorial. 
 
 ### Model Training and Cell Embedding Visualization
-[DOLPHIN Training and Cell Embedding](https://github.com/mcgilldinglab/DOLPHIN/blob/main/tutorial/step3_run_DOLPHIN.ipynb)
+[DOLPHIN Training and Cell Embedding](./docs/source/examples/run_DOLPHIN_flashseq.ipynb)
 
 ##### Run on example dataset:
 You can download the processed dataset from [here](https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=kEPtAV)
-and follow the [example](https://github.com/mcgilldinglab/DOLPHIN/blob/main/example/run_DOLPHIN.ipynb) to run the model.
+and follow the [example](./docs/source/examples/run_DOLPHIN_flashseq.ipynb) to run the model.
 
 ### Cell Aggregation
 For a detailed tutorial on cell aggregation, please refer to the [Cell Aggregation Tutorial](./tutorial/step4_cell_aggregation.ipynb).
