@@ -9,7 +9,7 @@ Main Function
 This is the recommended entry point for users.
 
 .. autofunction:: DOLPHIN.preprocess.generate_exon_gtf.generate_nonoverlapping_exons
-
+.. autofunction:: DOLPHIN.preprocess.generate_adj_index.generate_adj_index_table
 
 Helper Functions
 ----------------
