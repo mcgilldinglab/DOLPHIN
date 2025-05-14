@@ -73,7 +73,12 @@ In this step, we will split the BAM file into individual single-cell BAM files, 
 bamtools split -in /mnt/data/kailu/00_scExon/10_GO_PDAC/00_data_generation/02_single_std_bam/T10/PADC_sub_T10.bam -tag CB
 ```
 
-## Step7: STAR Alignment 
+## Step7: STAR Alignment
+
+Align to modified exon GTF file and the standard reference genome.
+
+> *Note:* If no gene count table is needed, alignment to the standard reference genome can be skipped.
+
 ```bash
 ## `ID_SAMPLE` is the Cell Barcode Name
 mkdir ./03_exon_star/${ID_SAMPLE}

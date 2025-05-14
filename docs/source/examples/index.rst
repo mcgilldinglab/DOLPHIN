@@ -5,6 +5,8 @@ This section provides examples demonstrating how to run the DOLPHIN model, perfo
 .. toctree::
     :maxdepth: 1
     
+    feature_matrix_scanpy.ipynb
+    Adjacency_matrix_scanpy.ipynb
     run_DOLPHIN_flashseq.ipynb
     run_DOLPHIN_10x_colon.ipynb
     run_DOLPHIN_pdac.ipynb

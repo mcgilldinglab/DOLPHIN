@@ -1,4 +1,3 @@
-#combine h5ad files under a folder
 import anndata
 from scipy.sparse import csr_matrix
 import os

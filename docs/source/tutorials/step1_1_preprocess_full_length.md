@@ -45,7 +45,12 @@ trim = "/mnt/data/kailu/Apps/Trimmomatic-0.39/trimmomatic-0.39.jar"
 java -jar $trim SE ${ID_SAMPLE}.fastq.gz ${ID_SAMPLE}.trim.fastq.gz ILLUMINACLIP:/mnt/data/kailu/Apps/Trimmomatic-0.39/adapters/TruSeq3-SE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36 	
 ```
 
-## Step5: STAR Alignment - align to modifed exon gtf file and standard reference genome
+## Step 5: STAR Alignment
+
+Align to modified exon GTF file and the standard reference genome.
+
+> *Note:* If no gene count table is needed, alignment to the standard reference genome can be skipped.
+
 ```bash
 ## `ID_SAMPLE` is the Cell Barcode Name
 mkdir ./03_exon_star/${ID_SAMPLE}

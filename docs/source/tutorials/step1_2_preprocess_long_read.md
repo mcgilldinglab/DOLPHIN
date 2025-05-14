@@ -29,7 +29,7 @@ Get exon gene count using the modified exon GTF file. This will generate the gen
 ```bash
 mkdir ./04_exon_gene_cnt
 featureCounts -t exon -O -M \
-    -a Homo_sapiens.GRCh38.107.exon.gtf \
+    -a ./dolphin_exon_gtf/dolphin_exon_gtf.gtf \
     -o ./04_exon_gene_cnt/${ID_SAMPLE}.exongene.count.txt \
     ./00_scNanogps/MEL2/curated.minimap2.bam/$ID_SAMPLE.curated.minimap2.bam
 ```
@@ -41,7 +41,7 @@ Run the following command to get the exon and junction counts. This step will ge
 ```bash
 mkdir ./05_exon_junct_cnt
 featureCounts -t exon -f -O -J -M \
-    -a Homo_sapiens.GRCh38.107.exon.gtf \
+    -a ./dolphin_exon_gtf/dolphin_exon_gtf.gtf \
     -o ./05_exon_junct_cnt/${ID_SAMPLE}.exon.count.txt \
     ./00_scNanogps/MEL2/curated.minimap2.bam/$ID_SAMPLE.curated.minimap2.bam
 ```

@@ -93,6 +93,7 @@ def generate_adj_metadata_table(exon_pkl_path: str, output_dir: str = "./dolphin
     -------
     pd.DataFrame
         DataFrame with columns: 'Geneid', 'GeneName', 'Gene_Junc_name'
+        and a separate mapping DataFrame with 'gene_id' and 'gene_name'.
     """
 
     # 1. Load exon DataFrame
@@ -144,6 +145,12 @@ def generate_adj_metadata_table(exon_pkl_path: str, output_dir: str = "./dolphin
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, "dolphin_adj_metadata_table.csv")
     meta_df.to_csv(output_path, index=False)
-    print(f"[Saved] Metadata table saved to: {output_path}")
+    print(f"[Saved] Adjacency metadata table saved to: {output_path}")
 
-    return meta_df
+    # 6. get the gene id and gene name mapping dataframe
+    gene_mapping_df = meta_df[['Geneid', 'GeneName']].drop_duplicates().reset_index(drop=True).rename(columns={'Geneid': 'gene_id', 'GeneName': 'gene_name'})
+    output_path_gene = os.path.join(output_dir, "dolphin_gene_meta.csv")
+    gene_mapping_df.to_csv(output_path_gene, index=False)
+    print(f"[Saved] Gene metadata table saved to: {output_path_gene}")
+    
+    return meta_df, gene_mapping_df
