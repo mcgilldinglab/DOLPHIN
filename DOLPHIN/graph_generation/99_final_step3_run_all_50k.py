@@ -36,60 +36,6 @@ gtf_path= "/mnt/data/kailu/STAR_example/ensembl/Homo_sapiens.GRCh38.107.gtf"
 # celltype_mapper = {'B': 0, 'CD4 T': 1, 'CD8 T': 2, 'DC': 3, 'Mono': 4, 'NK': 5, 'other T': 6, 'other': 7}
 
 # ==================================
-# Adjacency Compression Version
-# ==================================
-# generate compressed version adjacency matrix
-print("Start Generating Compressed version of Adjacency Matrix")
-with tqdm(total=total_sample_size) as pbar:
-    for i in range(0, total_sample_size):
-        if i%adj_run_num==0:
-            pbar=combine_adj_comp(pbar, df_label, start_idx = i, sample_num=adj_run_num, output_path=out_directory, output_name= out_name)
-
-##combine the compressed adjacency matrix
-_anndata_ca_dict = {}
-
-total_number_anndata = math.ceil(total_sample_size/adj_run_num)
-_ca_all_names_lst = []
-print("Combining ", total_number_anndata, " compressed adjacency anndata")
-for j in range(0, total_number_anndata):
-    print(j)
-    _temp_ad = anndata.read_h5ad(os.path.join(out_directory, "AdjacencyComp_"+out_name+"_"+str(j)+".h5ad"))
-    _anndata_ca_dict["CA"+str(j%5)] = _temp_ad
-
-    if j < (len(range(0, total_number_anndata)) // 5) * 5:
-        if (j+1)%5 == 0:
-            for _i, (_, _ad) in enumerate(_anndata_ca_dict.items()):
-                if _i == 0:
-                    combine_anndata = _ad
-                else:
-                    combine_anndata = combine_anndata.concatenate(_ad, index_unique = None, batch_key = None)
-            _out_ca_name = "AdjacencyComp_"+out_name+"_"+str(j-4)+"_"+str(j)+".h5ad"
-            combine_anndata.write(os.path.join(out_directory,_out_ca_name))
-            _anndata_ca_dict = {}
-            _ca_all_names_lst.append(_out_ca_name)
-    elif j>=(len(range(0, total_number_anndata)) // 5) * 5 and j==max(range(0, total_number_anndata)):
-        for _i, (_, _ad) in enumerate(_anndata_ca_dict.items()):
-            if _i == 0:
-                combine_anndata = _ad
-            else:
-                combine_anndata = combine_anndata.concatenate(_ad, index_unique = None, batch_key = None)
-        _out_ca_name = "AdjacencyComp_"+out_name+"_"+str(total_number_anndata%5+1)+"_"+str(j)+".h5ad" 
-        combine_anndata.write(os.path.join(out_directory, _out_ca_name))
-        _anndata_ca_dict = {}
-        _ca_all_names_lst.append(_out_ca_name)
-
-_anndata_ca_all_dict = {}
-for _i, _ca_name in enumerate(_ca_all_names_lst):
-    _temp_ad = anndata.read_h5ad(os.path.join(out_directory, _ca_name))
-    _anndata_ca_all_dict["CA_all"+str(_i)] = _temp_ad
-    for _i, (_, _ad) in enumerate(_anndata_ca_all_dict.items()):
-        if _i == 0:
-            combine_anndata = _ad
-        else:
-            combine_anndata = combine_anndata.concatenate(_ad, index_unique = None, batch_key = None)
-    combine_anndata.write(os.path.join(out_directory,"AdjacencyComp_"+out_name+".h5ad"))
-
-# ==================================
 # Adjacency Compression Remove Exon Version
 # ==================================
 adj_comp_re_part1(out_directory, out_name)

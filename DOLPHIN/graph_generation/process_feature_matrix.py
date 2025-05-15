@@ -44,10 +44,12 @@ def run_feature_combination(
     clean_temp : bool
         Whether to delete the temporary folder after processing. Default is True.
 
-    Outputs
+    Returns
     -------
-    - Batch-wise `.h5ad` files for each group of samples.
-    - One final merged `.h5ad` file: `Feature_<out_name>.h5ad`.
+    None
+        Saves the following output files:
+        - Batch-wise `.h5ad` files for each group of samples.
+        - A final merged `.h5ad` file: `Feature_<out_name>.h5ad`.
 
     """
     

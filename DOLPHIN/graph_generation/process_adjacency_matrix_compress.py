@@ -42,13 +42,10 @@ def run_adjacency_compression(
     num_processes : int, optional
         Number of parallel processes to run. Default is 25.
 
-    Notes
-    -----
-    - Requires `anndata`, `numpy`, `pandas`, and `multiprocessing`.
-    - Only genes with more than one exon AND non-zero expression in at least
-      one cell are considered.
-    - For each cell, the updated adjacency matrix is saved as:
-      <cell>.h5ad in the output directory.
+    Returns
+    -------
+    None
+        Saves the updated adjacency matrix for each cell as `<cell>.h5ad` in the output directory.
 
     """
 

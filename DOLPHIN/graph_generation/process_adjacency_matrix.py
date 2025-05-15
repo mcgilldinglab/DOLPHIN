@@ -37,11 +37,16 @@ def run_adjacency_combination(
     out_directory : str
         Output folder to save results.
     adj_run_num : int
-        Number of cells to combine per batch. Default is 25.
+        Number of cells to combine per batch. Default is 50.
     clean_temp : bool
         Whether to delete temporary intermediate batch files.
     parallel : bool
         If True, run batches in parallel. Default is True.
+        
+    Returns
+    -------
+    None
+        Save Adjacency_<out_name>.h5ad to the output directory.
     """
     print("Start Combining Adjacency Matrix...")
     df_label = pd.read_csv(metadata_path, sep='\t')

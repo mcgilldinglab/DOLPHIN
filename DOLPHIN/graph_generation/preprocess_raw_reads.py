@@ -55,18 +55,14 @@ def run_parallel_gene_processing(
     n_processes : int, optional
         Number of threads or processes to run in parallel. If None, uses all available CPU cores.
 
-    Raises
-    ------
-    FileNotFoundError
-        If the `05_exon_junct_cnt` subfolder is not found in `main_folder`.
+    Returns
+    -------
+    None
+        Saves the following files to the `06_graph_mtx` subdirectory inside `main_folder`:
+        
+        - `<cell_id>_fea.csv`: Flattened feature vector (exon counts) for each cell.
+        - `<cell_id>_adj.csv`: Flattened adjacency matrix vector for each cell.
 
-    Notes
-    -----
-    The output files are:
-    - `<cell_id>_fea.csv`: Flattened feature vector (exon counts) per cell
-    - `<cell_id>_adj.csv`: Flattened adjacency matrix vector per cell
-
-    These files are saved to the `06_graph_mtx` subdirectory inside `main_folder`.
     """
     
     print("Starting Raw Reads Processing...")
