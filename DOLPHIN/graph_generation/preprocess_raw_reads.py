@@ -5,8 +5,6 @@ import os
 import logging
 import sys
 
-
-# 设置 logger（替代 print）
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
