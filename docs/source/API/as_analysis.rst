@@ -5,5 +5,6 @@ DOLPHIN performs alternative splicing analysis using the `Outrigger module <http
 
 .. [1] Song, Y., Botvinnik, O. B., Lovci, M. T., Kakaradov, B., Liu, P., Xu, J. L., & Yeo, G. W. (2017). *Single-cell alternative splicing analysis with Expedition reveals splicing dynamics during neuron differentiation*. Molecular Cell, 67(1), 148–161. https://pubmed.ncbi.nlm.nih.gov/28673540/
 
-.. autofunction:: DOLPHIN.as_analysis.convert_psi_to_h5ad.convert_psi_to_h5ad
-.. autofunction:: DOLPHIN.as_analysis.differential_as_data.prepare_data_for_differential_AS_analysis
+.. autofunction:: DOLPHIN.AS.convert_psi_to_h5ad.run_convert_psi
+.. autofunction:: DOLPHIN.AS.convert_random_psi.run_psi_random
+.. autofunction:: DOLPHIN.AS.generate_differential_as.run_differential_as

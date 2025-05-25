@@ -16,4 +16,5 @@ This section contains step-by-step tutorials for using the DOLPHIN tool.
     step5_alternative_splicing.md
     step6_alternative_splicing_analysis.ipynb
     step7_1_MAST.ipynb
-    step7_2_EDEG_analysis.ipynb
+    step7_2_exon_level.ipynb
+    step7_3_junction_level.ipynb
