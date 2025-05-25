@@ -80,7 +80,7 @@ conda activate DOLPHIN
 
    - For **10X RNA-seq**, refer to the [10X tutorial](./docs/source/tutorials/step1_2_preprocess_10X.md).
      
-3. After aligning the RNA-seq data, generate the **feature matrix** and **adjacency matrix** using the provided [methods](https://github.com/mcgilldinglab/DOLPHIN/tree/main/tutorial) in the tutorial. 
+3. After aligning the RNA-seq data, generate the **feature matrix** and **adjacency matrix** using the provided [methods](./docs/source/tutorials/step2_graph_generation.ipynb) in the tutorial. 
 
 ### Model Training and Cell Embedding Visualization
 [DOLPHIN Training and Cell Embedding](./docs/source/examples/run_DOLPHIN_flashseq.ipynb)
@@ -90,18 +90,17 @@ You can download the processed dataset from [here](https://mcgill-my.sharepoint.
 and follow the [example](./docs/source/examples/run_DOLPHIN_flashseq.ipynb) to run the model.
 
 ### Cell Aggregation
-For a detailed tutorial on cell aggregation, please refer to the [Cell Aggregation Tutorial](./tutorial/step4_cell_aggregation.ipynb).
+For a detailed tutorial on cell aggregation, please refer to the [Cell Aggregation Tutorial](./docs/source/tutorials/step4_cell_aggregation.ipynb).
 
 ### Alternative Splicing Analysis
 1. **Detecting Alternative Splicing using Outrigger**: 
-   To detect alternative splicing events, please follow the [Alternative Splicing Detection Tutorial](./tutorial/step5_alternative_splicing.md).
+   To detect alternative splicing events, please follow the [Alternative Splicing Detection Tutorial](./docs/source/tutorials/step5_alternative_splicing.md).
 
 2. **Alternative Splicing Analysis**:
-   This section explains the alternative splicing analysis performed as described in the manuscript. For a detailed tutorial, please refer to the [Alternative Splicing Analysis](./tutorial/step6_alternative_splicing_analysis.ipynb).
+   This section explains the alternative splicing analysis performed as described in the manuscript. For a detailed tutorial, please refer to the [Alternative Splicing Analysis](./docs/source/tutorials/step6_alternative_splicing_analysis.ipynb).
 
 ### Exon-Level Differential Gene Analysis
 
-For a detailed walkthrough of the exon-level differential gene analysis, please follow this [tutorial](./tutorial/step7_2_EDEG_analysis.ipynb).
-
+For a detailed walkthrough of the exon-level differential gene analysis, please follow this [tutorial](./docs/source/tutorials/step7_1_MAST.ipynb).
 
 If you find the tool is useful to your study, please consider citing the DOLPHIN [manuscript](https://doi.org/10.21203/rs.3.rs-5474597/v1).
