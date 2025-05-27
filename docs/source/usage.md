@@ -49,10 +49,10 @@ conda activate DOLPHIN
 ```
 
 ## Example Dataset
-You can download the processed dataset from [One Drive.](https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=kEPtAV).
+You can download the processed dataset from [One Drive.](https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=kEPtAV)
 
 **Required files**
 
-For human alignment to the exon level, please download the pre-processed gtf file here:[One Drive.](https://outlook.office.com/host/377c982d-9686-450e-9a7c-22aeaf1bc162/7211f19f-262a-42eb-a02e-289956491741)
+For human alignment to the exon level, please download the pre-processed gtf file here:[One Drive.](https://mcgill-my.sharepoint.com/:f:/g/personal/kailu_song_mail_mcgill_ca/EvZtHeW7qjJJs_RHc2-327ABeLXafa-ruvfk9Vs134crig?e=kEPtAV)
 
 
