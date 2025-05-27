@@ -163,4 +163,5 @@ dependencies:
   - urllib3==2.2.3
   - webencodings==0.5.1
   - yarl==1.17.2
+  - matplotlib-venn
 name: DOLPHIN

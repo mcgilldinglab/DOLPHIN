@@ -8,3 +8,4 @@ DOLPHIN performs alternative splicing analysis using the `Outrigger module <http
 .. autofunction:: DOLPHIN.AS.convert_psi_to_h5ad.run_convert_psi
 .. autofunction:: DOLPHIN.AS.convert_random_psi.run_psi_random
 .. autofunction:: DOLPHIN.AS.generate_differential_as.run_differential_as
+.. autofunction:: DOLPHIN.AS.convert_modality_ohe.run_modality_ohe
