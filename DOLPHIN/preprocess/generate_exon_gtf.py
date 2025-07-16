@@ -34,15 +34,31 @@ def prepare_exon_gtf(input_gtf_path, output_dir="./"):
     # 2. Load GTF and parse
     df_gtf = gtfpy.readGTF(input_gtf_path)
     GTFpa = gtfpy.parseGTF(df_gtf)
-    
     print(f"[Status] GTF loaded and parsed with {GTFpa.shape[0]} total entries.")
 
     # 3. Filter exon features and keep necessary columns
-    df_exon = GTFpa[GTFpa["feature"] == "exon"][[
+    # df_exon = GTFpa[GTFpa["feature"] == "exon"][[
+    #     'seqname', 'source', 'feature', 'start', 'end', 'score',
+    #     'strand', 'frame', 'gene_id', 'gene_version', 'gene_name',
+    #     'gene_source', 'gene_biotype', 'exon_number'
+    # ]]
+    required_cols = [
         'seqname', 'source', 'feature', 'start', 'end', 'score',
-        'strand', 'frame', 'gene_id', 'gene_version', 'gene_name',
-        'gene_source', 'gene_biotype', 'exon_number'
-    ]]
+        'strand', 'frame', 'gene_id', 'gene_name', 'exon_number'
+    ]
+
+    optional_cols = ['gene_version', 'gene_source', 'gene_biotype', 'gene_type']
+
+    missing_required = [col for col in required_cols if col not in GTFpa.columns]
+    if missing_required:
+        raise ValueError(
+            f"GTFpa is missing required columns: {missing_required}. "
+            "Please check your GTF or preprocessing step."
+        )
+
+    final_cols = required_cols + [col for col in optional_cols if col in GTFpa.columns]
+
+    df_exon = GTFpa[GTFpa["feature"] == "exon"][final_cols]
 
     # 4. Sort and convert coordinates
     df_exon[["start", "end"]] = df_exon[["start", "end"]].apply(pd.to_numeric)
