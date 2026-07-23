@@ -22,12 +22,31 @@ scanpy <- import("scanpy")
 # Step 3: Convert h5ad file to Seurat object
 data_preprocess <- function(data_file) {
   adata <- scanpy$read(data_file)
-  meta <- adata$obs
-  gene <- adata$var
+  meta_dict <- py_to_r(adata$obs$to_dict("list"))
+  gene_dict <- py_to_r(adata$var$to_dict("list"))
   adata2 <- as.matrix(adata$X)
   adata_raw <- t(adata2)
-  rownames(adata_raw) <- rownames(gene)
-  colnames(adata_raw) <- rownames(meta)
+  gene_names <- tryCatch(py_to_r(adata$var_names$to_list()), error = function(e) NULL)
+  cell_names <- tryCatch(py_to_r(adata$obs_names$to_list()), error = function(e) NULL)
+  if (is.null(gene_names) || length(gene_names) != nrow(adata_raw)) {
+    gene_names <- names(gene_dict[[1]])
+  }
+  if (is.null(cell_names) || length(cell_names) != ncol(adata_raw)) {
+    stop("Failed to recover cell names from AnnData obs_names.")
+  }
+  rownames(adata_raw) <- gene_names
+  colnames(adata_raw) <- cell_names
+  meta <- as.data.frame(meta_dict, stringsAsFactors = FALSE)
+  rownames(meta) <- cell_names
+  meta[] <- lapply(meta, function(x) {
+    if (is.factor(x)) {
+      as.character(x)
+    } else if (is.list(x)) {
+      vapply(x, as.character, character(1))
+    } else {
+      as.vector(x)
+    }
+  })
   merge <- CreateSeuratObject(adata_raw)
   merge <- AddMetaData(merge, meta)
   return(merge)

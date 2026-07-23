@@ -1,0 +1,377 @@
+{
+  "updated_at": "2026-03-30",
+  "workspace_root": "/mnt/md0/kailu/DOLPHIN_codex",
+  "optimized_repo_root": "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized",
+  "clean_code_locations": {
+    "preprocess_dir": "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/DOLPHIN/preprocess",
+    "main_code_files": [
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/DOLPHIN/preprocess/generate_exon_gtf.py",
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/DOLPHIN/preprocess/generate_adj_index.py",
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/DOLPHIN/preprocess/cli.py",
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/DOLPHIN/preprocess/pipeline.py",
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/DOLPHIN/preprocess/__init__.py"
+    ],
+    "documentation_files": [
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/docs/source/API/preprocess.rst",
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/docs/source/tutorials/step1_preprocess_strategy.md",
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/docs/source/tutorials/step1_preprocess_cli.md",
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/docs/source/tutorials/step1_1_preprocess_full_length.md",
+      "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/docs/source/tutorials/step1_2_preprocess_10X.md"
+    ]
+  },
+  "validated_artifacts": {
+    "reference_bundle_dir": "/mnt/md0/kailu/DOLPHIN_codex/reference_inputs/grch38_release107/dolphin_exon_gtf",
+    "full_length_plan_dir": "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/example_runs/full_length_rawfastq_only_plan",
+    "active_execution_dirs": {
+      "step0_reference_run": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/step0_reference_grch38_release107_star",
+      "full_length_run": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/full_length_flashseq_clean_v1",
+      "tenx_run": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/tenx_srr8513796_clean_v1"
+    }
+  },
+  "steps": [
+    {
+      "step_id": "step0_prepare_reference",
+      "status": "implemented_and_completed_with_shared_star_index",
+      "entrypoint": "dolphin-preprocess prepare-reference",
+      "required_inputs": [
+        {
+          "name": "input_gtf",
+          "flag": "--input-gtf",
+          "required": true
+        }
+      ],
+      "optional_inputs": [
+        {
+          "name": "genome_fasta",
+          "flag": "--genome-fasta",
+          "required": false
+        },
+        {
+          "name": "star_binary",
+          "flag": "--star-binary",
+          "required": false
+        },
+        {
+          "name": "star_threads",
+          "flag": "--star-threads",
+          "required": false
+        }
+      ],
+      "outputs": [
+        "dolphin_exon_gtf.gtf",
+        "dolphin.exon.pkl",
+        "dolphin_adj_index.csv",
+        "dolphin_adj_metadata_table.csv",
+        "reference_manifest.json",
+        "step_timing.tsv"
+      ]
+    },
+    {
+      "step_id": "step1_full_length_plan",
+      "status": "implemented_and_validated_for_plan_generation",
+      "entrypoint": "dolphin-preprocess plan-preprocess --mode full_length",
+      "required_inputs": [
+        {
+          "name": "reference_manifest",
+          "flag": "--reference-manifest",
+          "required": true
+        },
+        {
+          "name": "raw_fastq_dir",
+          "flag": "--raw-fastq-dir",
+          "required": true
+        },
+        {
+          "name": "output_dir",
+          "flag": "--output-dir",
+          "required": true
+        }
+      ],
+      "optional_inputs": [
+        {
+          "name": "metadata_path",
+          "flag": "--metadata-path",
+          "required": false
+        },
+        {
+          "name": "read_layout",
+          "flag": "--read-layout",
+          "required": false
+        },
+        {
+          "name": "trim",
+          "flag": "--trim",
+          "required": false
+        }
+      ],
+      "outputs": [
+        "preprocess_plan.json",
+        "run_preprocess.sh"
+      ],
+      "additional_outputs": [
+        "parallel_recommendations",
+        "star_threads_per_cell",
+        "featurecounts_threads_per_cell",
+        "grouped_gene_count_stage",
+        "grouped_exon_junction_count_stage"
+      ],
+      "preserved_example_output_dir": "/mnt/md0/kailu/DOLPHIN_codex/DOLPHIN_optimized/example_runs/full_length_rawfastq_only_plan",
+      "active_execution_plan_dir": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/full_length_flashseq_clean_v1"
+    },
+    {
+      "step_id": "step1_full_length_run",
+      "status": "implemented_and_completed",
+      "entrypoint": "dolphin-preprocess run-preprocess",
+      "required_inputs": [
+        {
+          "name": "plan_manifest",
+          "flag": "--plan-manifest",
+          "required": true
+        }
+      ],
+      "optional_inputs": [
+        {
+          "name": "log_dir",
+          "flag": "--log-dir",
+          "required": false
+        },
+        {
+          "name": "resume",
+          "flag": "--resume",
+          "required": false
+        },
+        {
+          "name": "max_parallel_cells",
+          "flag": "--max-parallel-cells",
+          "required": false
+        },
+        {
+          "name": "parallel_profile",
+          "flag": "--parallel-profile",
+          "required": false
+        }
+      ],
+      "outputs": [
+        "per_stage_logs",
+        "execution_timing.tsv",
+        "execution_summary.json",
+        "04_exon_gene_cnt_grouped",
+        "05_exon_junct_cnt_grouped"
+      ],
+      "active_execution_dir": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/full_length_flashseq_clean_v1"
+    },
+    {
+      "step_id": "step1_tenx_plan",
+      "status": "implemented_and_validated_for_real_plan_generation",
+      "entrypoint": "dolphin-preprocess plan-preprocess --mode tenx",
+      "required_inputs": [
+        {
+          "name": "reference_manifest",
+          "flag": "--reference-manifest",
+          "required": true
+        },
+        {
+          "name": "raw_fastq_dir",
+          "flag": "--raw-fastq-dir",
+          "required": true
+        },
+        {
+          "name": "output_dir",
+          "flag": "--output-dir",
+          "required": true
+        },
+        {
+          "name": "solo_whitelist",
+          "flag": "--solo-whitelist",
+          "required": true
+        },
+        {
+          "name": "chemistry",
+          "flag": "--chemistry",
+          "required": true
+        }
+      ],
+      "optional_inputs": [
+        {
+          "name": "metadata_path",
+          "flag": "--metadata-path",
+          "required": false
+        },
+        {
+          "name": "sample_name",
+          "flag": "--sample-name",
+          "required": false
+        },
+        {
+          "name": "solo_cell_filter",
+          "flag": "--solo-cell-filter",
+          "required": false
+        },
+        {
+          "name": "append_suffix",
+          "flag": "--append-suffix",
+          "required": false
+        }
+      ],
+      "outputs": [
+        "preprocess_plan.json",
+        "run_preprocess.sh"
+      ],
+      "active_execution_plan_dir": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/tenx_srr8513796_clean_v1"
+    },
+    {
+      "step_id": "step1_tenx_run",
+      "status": "implemented_and_completed",
+      "entrypoint": "dolphin-preprocess run-preprocess",
+      "required_inputs": [
+        {
+          "name": "plan_manifest",
+          "flag": "--plan-manifest",
+          "required": true
+        }
+      ],
+      "optional_inputs": [
+        {
+          "name": "log_dir",
+          "flag": "--log-dir",
+          "required": false
+        },
+        {
+          "name": "resume",
+          "flag": "--resume",
+          "required": false
+        }
+      ],
+      "outputs": [
+        "per_stage_logs",
+        "execution_timing.tsv",
+        "execution_summary.json"
+      ],
+      "active_execution_dir": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/tenx_srr8513796_clean_v1"
+    },
+    {
+      "step_id": "utility_recommend_parallelism",
+      "status": "implemented_and_validated_on_current_machine",
+      "entrypoint": "dolphin-preprocess recommend-parallelism",
+      "required_inputs": [
+        {
+          "name": "sample_count",
+          "flag": "--sample-count",
+          "required": true
+        }
+      ],
+      "optional_inputs": [
+        {
+          "name": "star_threads",
+          "flag": "--star-threads",
+          "required": false
+        },
+        {
+          "name": "featurecounts_threads",
+          "flag": "--featurecounts-threads",
+          "required": false
+        }
+      ],
+      "outputs": [
+        "system_snapshot",
+        "conservative_profile",
+        "balanced_profile",
+        "aggressive_profile"
+      ]
+    },
+    {
+      "step_id": "utility_cb_to_rg",
+      "status": "implemented_in_stream_and_bam_native_modes",
+      "entrypoint": "dolphin-preprocess cb-to-rg",
+      "required_inputs": [
+        {
+          "name": "sam_stream_stdin",
+          "required": true
+        }
+      ],
+      "optional_inputs": [
+        {
+          "name": "append_suffix",
+          "flag": "--append-suffix",
+          "required": false
+        },
+        {
+          "name": "input_bam",
+          "flag": "--input-bam",
+          "required": false
+        },
+        {
+          "name": "output_bam",
+          "flag": "--output-bam",
+          "required": false
+        }
+      ]
+    },
+    {
+      "step_id": "utility_split_featurecounts",
+      "status": "implemented_and_synthetically_validated",
+      "entrypoint": "dolphin-preprocess split-featurecounts",
+      "required_inputs": [
+        {
+          "name": "mode",
+          "flag": "--mode",
+          "required": true
+        },
+        {
+          "name": "input_path",
+          "flag": "--input-path",
+          "required": true
+        },
+        {
+          "name": "output_dir",
+          "flag": "--output-dir",
+          "required": true
+        }
+      ],
+      "optional_inputs": [
+        {
+          "name": "metadata_path",
+          "flag": "--metadata-path",
+          "required": false
+        },
+        {
+          "name": "cell_id_list_path",
+          "flag": "--cell-id-list-path",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "example_inputs": {
+    "full_length_raw_fastq_dir": "/mnt/md0/kailu/DOLPHIN_codex/data_example/flashseq/raw_fastq",
+    "tenx_raw_fastq_dir": "/mnt/md0/kailu/DOLPHIN_codex/data_example/10x/raw_fastq",
+    "full_length_metadata": "/mnt/md0/kailu/DOLPHIN_codex/data_example/flashseq/metadata.csv",
+    "tenx_metadata": "/mnt/md0/kailu/DOLPHIN_codex/data_example/10x/10x_metadata.csv"
+  },
+  "current_external_gaps": {
+    "star_on_path": false,
+    "featurecounts_on_path": false,
+    "samtools_on_path": false,
+    "human_genome_fasta_present_under_dolphin_codex": true,
+    "tenx_whitelist_present_under_dolphin_codex": true,
+    "local_runtime_env_available": true,
+    "shared_star_index_finished": true
+  },
+  "preferred_output_layout": {
+    "canonical_count_layout": "grouped_matrix_outputs",
+    "compatibility_count_layout": "one_file_per_cell",
+    "note": "For both full-length and 10x, grouped sparse exon and junction matrices should be treated as the primary preprocessing product. Per-cell split files remain only for backward compatibility until downstream readers are updated."
+  },
+  "minimum_skill_contract": {
+    "required_user_inputs": [
+      "raw_fastq",
+      "source_gtf"
+    ],
+    "optional_user_inputs": [
+      "genome_fasta",
+      "metadata",
+      "tenx_whitelist"
+    ],
+    "note": "Metadata is optional and should not be treated as a required preprocess input."
+  }
+}

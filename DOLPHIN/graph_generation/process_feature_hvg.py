@@ -2,9 +2,18 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 import anndata
-import math
 import os
 from scipy import sparse
+from ._anndata_compat import enable_nullable_string_writes
+
+
+def _round_to_csr_float32(matrix):
+    if sparse.issparse(matrix):
+        rounded = matrix.tocsr(copy=True).astype(np.float32)
+        rounded.data = np.round(rounded.data).astype(np.float32, copy=False)
+        rounded.eliminate_zeros()
+        return rounded
+    return sparse.csr_matrix(np.round(np.asarray(matrix)).astype(np.float32))
 
 def run_feature_hvg(
     out_name: str,
@@ -37,7 +46,7 @@ def run_feature_hvg(
     cell_keep = list(hvg_adata.obs.index)
     hvg_list = set(hvg_adata.var["Geneid"])
 
-    adata = adata[adata.obs.index.isin(cell_keep), :]
+    adata = adata[adata.obs.index.isin(cell_keep), :].copy()
 
     #normalize the feature matrix and round to nearest integer 
     sc.pp.normalize_total(adata)
@@ -53,12 +62,7 @@ def run_feature_hvg(
     # X_rounded_sparse = sparse.csr_matrix(np.round(X_rounded).astype(np.float32))
     # adata_final = anndata.AnnData(X=X_rounded_sparse, obs=adata_hvg.obs.copy(), var=adata_hvg.var.copy())
 
-    if sparse.issparse(adata_hvg.X):
-        X_dense = adata_hvg.X.toarray()
-    else:
-        X_dense = adata_hvg.X
-
-    X_rounded_sparse = sparse.csr_matrix(np.round(X_dense).astype(np.float32))
+    X_rounded_sparse = _round_to_csr_float32(adata_hvg.X)
 
     adata_final = anndata.AnnData(X=X_rounded_sparse, obs=adata_hvg.obs.copy(), var=adata_hvg.var.copy())
 
@@ -66,4 +70,5 @@ def run_feature_hvg(
     print("The Final Feature Matrix Size is " + str(adata_final.shape[0]) + " Cells and " +str(adata_final.shape[1])+ " exons")
 
     #remove unneccary var names
+    enable_nullable_string_writes()
     adata_final.write(os.path.join(final_out_dir, "FeatureCompHvg_"+out_name+".h5ad"))

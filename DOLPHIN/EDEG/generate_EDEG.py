@@ -74,21 +74,29 @@ def run_edeg(seurat_output, adata_input, gtf_path, output):
     pd_MAST['Gene_names'] = pd_MAST['Exon_names'].apply(lambda x: x[:x.rfind('-')] if '-' in x else x)
 
     df_gtf_orig = gtfpy.readGTF(gtf_path)
-    attribute_split = df_gtf_orig['attribute'].str.split(';', expand=True)
-    df_gtf = pd.concat([df_gtf_orig, attribute_split], axis=1)[[0, 2, 5, "start", "end"]]
-    df_gtf["gene_id"] = df_gtf[0].str.extract(r'"(.*?)"')
-    df_gtf["exon_num"] = df_gtf[5].str.extract(r'"(.*?)"')
-    df_gtf["_new"] = df_gtf["gene_id"] + "-" + df_gtf["exon_num"]
+    df_gtf = df_gtf_orig[["attribute", "start", "end"]].copy()
+    df_gtf["gene_id"] = df_gtf["attribute"].str.extract(r'gene_id "(.*?)"')
+    df_gtf["gene_name"] = df_gtf["attribute"].str.extract(r'gene_name "(.*?)"')
+    df_gtf["exon_num"] = df_gtf["attribute"].str.extract(r'exon_number "(.*?)"')
+    df_gtf["_new_gene_id"] = df_gtf["gene_id"] + "-" + df_gtf["exon_num"]
+    df_gtf["_new_gene_name"] = df_gtf["gene_name"] + "-" + df_gtf["exon_num"]
 
     adata = sc.read_h5ad(adata_input)
-    adata.var["_new"]= adata.var.groupby('gene_id').cumcount() + 1
-    adata.var['_new'] = adata.var['gene_id'].astype("str") + '-' + adata.var['_new'].astype(str)
+    adata.var["_exon_num"]= adata.var.groupby('gene_id').cumcount() + 1
+    adata.var['_new_gene_id'] = adata.var['gene_id'].astype("str") + '-' + adata.var['_exon_num'].astype(str)
+    adata.var['_new_gene_name'] = adata.var['gene_name'].astype("str") + '-' + adata.var['_exon_num'].astype(str)
 
-    dict_start = dict(zip(df_gtf['_new'], df_gtf['start']))
-    dict_end = dict(zip(df_gtf['_new'], df_gtf['end']))
+    dict_start_gene_id = dict(zip(df_gtf['_new_gene_id'], df_gtf['start']))
+    dict_end_gene_id = dict(zip(df_gtf['_new_gene_id'], df_gtf['end']))
+    dict_start_gene_name = dict(zip(df_gtf['_new_gene_name'], df_gtf['start']))
+    dict_end_gene_name = dict(zip(df_gtf['_new_gene_name'], df_gtf['end']))
 
-    adata.var['start'] = adata.var['_new'].map(dict_start)
-    adata.var['end'] = adata.var['_new'].map(dict_end)
+    adata.var['start'] = adata.var['_new_gene_id'].map(dict_start_gene_id)
+    adata.var['end'] = adata.var['_new_gene_id'].map(dict_end_gene_id)
+    missing_start = adata.var['start'].isna()
+    missing_end = adata.var['end'].isna()
+    adata.var.loc[missing_start, 'start'] = adata.var.loc[missing_start, '_new_gene_name'].map(dict_start_gene_name)
+    adata.var.loc[missing_end, 'end'] = adata.var.loc[missing_end, '_new_gene_name'].map(dict_end_gene_name)
 
     dict_map_start = dict(zip(adata.var.index, adata.var["start"]))
     dict_map_end = dict(zip(adata.var.index, adata.var["end"]))
