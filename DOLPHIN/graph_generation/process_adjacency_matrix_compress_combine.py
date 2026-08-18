@@ -1,15 +1,63 @@
 import os
-import math
 import shutil
-import pandas as pd
-import anndata
-from multiprocessing import Pool, cpu_count
-from tqdm import tqdm
-from functools import partial
-from .func_step02_adj_mat_main_part2_main_3_combine import combine_adj_comp
 
-def _combine_adj_comp_wrapper(args):
-    return combine_adj_comp(*args)
+import h5py
+import pandas as pd
+from anndata.experimental import concat_on_disk
+
+from ._anndata_compat import enable_nullable_string_writes
+
+
+def _ordered_adj_comp_paths(sample_ids, temp_out_dir):
+    shard_manifest = os.path.join(temp_out_dir, "adj_comp_shards", "manifest.tsv")
+    if os.path.exists(shard_manifest):
+        shard_df = pd.read_csv(shard_manifest, sep="\t")
+        shard_df = shard_df.sort_values("shard_index", kind="stable").reset_index(drop=True)
+        return [
+            os.path.join(temp_out_dir, "adj_comp_shards", file_name)
+            for file_name in shard_df["file_name"].tolist()
+        ]
+
+    adj_comp_dir = os.path.join(temp_out_dir, "adj_comp_matrix")
+    file_paths = []
+    missing = []
+    for sample_id in sample_ids:
+        path = os.path.join(adj_comp_dir, sample_id + ".h5ad")
+        if os.path.exists(path):
+            file_paths.append(path)
+        else:
+            missing.append(sample_id)
+    if missing:
+        preview = ", ".join(missing[:10])
+        raise FileNotFoundError(
+            "Missing compressed adjacency files for "
+            f"{len(missing)} cells. Examples: {preview}"
+        )
+    return file_paths
+
+
+def _copy_var_metadata(source_path, destination_path):
+    # `concat_on_disk(..., merge=None)` keeps the sparse matrix and obs on disk
+    # efficiently, then we copy the reference var metadata from one input file.
+    with h5py.File(destination_path, "a") as dst, h5py.File(source_path, "r") as src:
+        for key in ("var", "varm", "varp"):
+            if key in dst:
+                del dst[key]
+            if key in src:
+                src.copy(key, dst)
+
+
+def _remove_path(path):
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+    elif os.path.exists(path):
+        os.remove(path)
+
+
+def _temp_h5ad_path(final_output_path):
+    if final_output_path.endswith(".h5ad"):
+        return final_output_path[: -len(".h5ad")] + ".partial.h5ad"
+    return final_output_path + ".partial.h5ad"
 
 def run_adjacency_compress_combination(
     metadata_path: str,
@@ -18,9 +66,11 @@ def run_adjacency_compress_combination(
     adj_run_num: int = 50,
     clean_temp: bool = True,
     parallel: bool = True,
+    max_processes: int | None = None,
+    max_loaded_elems: int = 100_000_000,
 ):
     """
-    Combine compressed adjacency matrices in batches and merge into a final AnnData object.
+    Combine compressed adjacency matrices into a final AnnData object.
 
     Parameters
     ----------
@@ -31,11 +81,17 @@ def run_adjacency_compress_combination(
     out_directory : str
         Output folder to save results.
     adj_run_num : int
-        Number of cells to combine per batch. Default is 50.
+        Retained for backward compatibility. The optimized implementation no
+        longer materializes intermediate batch-level h5ad files.
     clean_temp : bool
         Whether to delete temporary intermediate batch files.
     parallel : bool
-        If True, run batches in parallel.
+        Retained for backward compatibility.
+    max_processes : int | None
+        Retained for backward compatibility.
+    max_loaded_elems : int
+        Passed to `anndata.experimental.concat_on_disk` to bound sparse-array
+        loading in memory during concatenation.
         
     Returns
     -------
@@ -46,42 +102,31 @@ def run_adjacency_compress_combination(
     print("Start Combining Compressed Adjacency Matrix...")
 
     df_label = pd.read_csv(metadata_path, sep='\t')
-    total_sample_size = len(df_label)
+    sample_ids = list(df_label["CB"])
 
     final_out_dir = os.path.join(out_directory, "data")
     temp_out_dir = os.path.join(final_out_dir, "temp")
     os.makedirs(temp_out_dir, exist_ok=True)
-
-    # 1. Prepare batch arguments
-    args_list = [
-        (df_label, i, adj_run_num, temp_out_dir, out_name)
-        for i in range(0, total_sample_size, adj_run_num)
-    ]
-
-    # 2. Run in parallel or sequential
-    if parallel:
-        print(f"Running in parallel with batch size = {adj_run_num} ...")
-        with Pool(processes=cpu_count()) as pool:
-            for idx, _ in enumerate(tqdm(pool.imap_unordered(_combine_adj_comp_wrapper, args_list), total=len(args_list))):
-                pass
-    else:
-        print(f"Running sequentially with batch size = {adj_run_num} ...")
-        for idx, args in enumerate(tqdm(args_list), start=1):
-            _combine_adj_comp_wrapper(args)
-
-    # 3. Merge all temporary .h5ad files
-    print("Merging .h5ad batches...")
-    total_batches = math.ceil(total_sample_size / adj_run_num)
-    adata_list = [
-        anndata.read_h5ad(os.path.join(temp_out_dir, f"AdjacencyComp_{out_name}_{i}.h5ad"))
-        for i in range(total_batches)
-    ]
-    combined_adata = adata_list[0]
-    for ad in adata_list[1:]:
-        combined_adata = combined_adata.concatenate(ad, index_unique=None, batch_key=None)
-
     final_output_path = os.path.join(final_out_dir, f"AdjacencyComp_{out_name}.h5ad")
-    combined_adata.write(final_output_path)
+    temp_output_path = _temp_h5ad_path(final_output_path)
+
+    input_files = _ordered_adj_comp_paths(sample_ids, temp_out_dir)
+
+    _remove_path(temp_output_path)
+    _remove_path(final_output_path)
+
+    enable_nullable_string_writes()
+    concat_on_disk(
+        input_files,
+        temp_output_path,
+        axis=0,
+        join="inner",
+        merge=None,
+        index_unique=None,
+        max_loaded_elems=max_loaded_elems,
+    )
+    _copy_var_metadata(input_files[0], temp_output_path)
+    os.replace(temp_output_path, final_output_path)
 
     # 4. Clean up temporary files
     if clean_temp:

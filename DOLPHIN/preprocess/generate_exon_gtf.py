@@ -1,13 +1,67 @@
-import pandas as pd
-from DOLPHIN.preprocess import gtfpy
-import numpy as np
+import glob
+import json
 import math
-from tqdm import tqdm 
+import os
+import shutil
+import subprocess
+from time import perf_counter
+
+import numpy as np
+import pandas as pd
 from intervaltree import Interval, IntervalTree
-import glob, os
+from tqdm import tqdm
+
+from DOLPHIN.preprocess import gtfpy
 
 pd.set_option('display.max_columns',500)
 pd.set_option('display.max_rows',100)
+
+
+def _init_timing_log(timing_log_path):
+    if timing_log_path is None:
+        return
+
+    os.makedirs(os.path.dirname(timing_log_path), exist_ok=True)
+    with open(timing_log_path, "w", encoding="utf-8") as handle:
+        handle.write("step\tseconds\tminutes\textra_json\n")
+
+
+def _append_timing_record(timing_log_path, step, seconds, extra=None):
+    if timing_log_path is None:
+        return
+
+    extra = extra or {}
+    with open(timing_log_path, "a", encoding="utf-8") as handle:
+        handle.write(
+            f"{step}\t{seconds:.6f}\t{seconds / 60.0:.6f}\t"
+            f"{json.dumps(extra, sort_keys=True)}\n"
+        )
+    print(f"[Timing] {step}: {seconds:.2f}s")
+
+
+def _run_timed_step(step_name, timing_log_path, func, *args, extra=None, **kwargs):
+    start_time = perf_counter()
+    result = func(*args, **kwargs)
+    elapsed = perf_counter() - start_time
+    _append_timing_record(timing_log_path, step_name, elapsed, extra=extra)
+    return result
+
+
+def _resolve_executable(executable_name):
+    if os.path.sep in executable_name:
+        executable_path = os.path.abspath(executable_name)
+        if os.path.isfile(executable_path) and os.access(executable_path, os.X_OK):
+            return executable_path
+        raise FileNotFoundError(f"Executable not found or not executable: {executable_name}")
+
+    resolved_path = shutil.which(executable_name)
+    if resolved_path is None:
+        raise FileNotFoundError(f"Could not find executable on PATH: {executable_name}")
+    return resolved_path
+
+
+def _extract_gtf_attribute(attribute_series, field_name):
+    return attribute_series.str.extract(fr'{field_name} "([^"]+)"', expand=False)
 
 def prepare_exon_gtf(input_gtf_path, output_dir="./"):
     """
@@ -31,38 +85,63 @@ def prepare_exon_gtf(input_gtf_path, output_dir="./"):
 
     print(f"[Step] Reading GTF file from: {input_gtf_path}")
 
-    # 2. Load GTF and parse
+    # 2. Load GTF and only parse exon rows and needed attributes.
     df_gtf = gtfpy.readGTF(input_gtf_path)
-    GTFpa = gtfpy.parseGTF(df_gtf)
-    print(f"[Status] GTF loaded and parsed with {GTFpa.shape[0]} total entries.")
+    df_exon = df_gtf[df_gtf["feature"] == "exon"].copy()
+    print(
+        f"[Status] Loaded {df_gtf.shape[0]} total entries and kept "
+        f"{df_exon.shape[0]} exon entries."
+    )
 
-    # 3. Filter exon features and keep necessary columns
-    # df_exon = GTFpa[GTFpa["feature"] == "exon"][[
-    #     'seqname', 'source', 'feature', 'start', 'end', 'score',
-    #     'strand', 'frame', 'gene_id', 'gene_version', 'gene_name',
-    #     'gene_source', 'gene_biotype', 'exon_number'
-    # ]]
-    required_cols = [
-        'seqname', 'source', 'feature', 'start', 'end', 'score',
-        'strand', 'frame', 'gene_id', 'gene_name', 'exon_number'
+    if df_exon.empty:
+        raise ValueError("No exon entries were found in the input GTF.")
+
+    attribute_cols = [
+        "gene_id",
+        "gene_name",
+        "exon_number",
+        "gene_version",
+        "gene_source",
+        "gene_biotype",
+        "gene_type",
     ]
+    for col in attribute_cols:
+        df_exon[col] = _extract_gtf_attribute(df_exon["attribute"], col)
 
-    optional_cols = ['gene_version', 'gene_source', 'gene_biotype', 'gene_type']
-
-    missing_required = [col for col in required_cols if col not in GTFpa.columns]
+    missing_required = [
+        col for col in ("gene_id", "exon_number")
+        if df_exon[col].isna().all()
+    ]
     if missing_required:
         raise ValueError(
-            f"GTFpa is missing required columns: {missing_required}. "
-            "Please check your GTF or preprocessing step."
+            f"Input GTF is missing required attributes: {missing_required}."
         )
 
-    final_cols = required_cols + [col for col in optional_cols if col in GTFpa.columns]
-
-    df_exon = GTFpa[GTFpa["feature"] == "exon"][final_cols]
+    final_cols = [
+        "seqname",
+        "source",
+        "feature",
+        "start",
+        "end",
+        "score",
+        "strand",
+        "frame",
+        "gene_id",
+        "gene_name",
+        "exon_number",
+        "gene_version",
+        "gene_source",
+        "gene_biotype",
+        "gene_type",
+    ]
+    df_exon = df_exon[final_cols]
 
     # 4. Sort and convert coordinates
     df_exon[["start", "end"]] = df_exon[["start", "end"]].apply(pd.to_numeric)
-    df_exon = df_exon.sort_values(by=["seqname", "start", "end"], ascending=[True, True, True])
+    df_exon = df_exon.sort_values(
+        by=["gene_id", "start", "end"],
+        ascending=[True, True, True],
+    )
 
     # 5. Remove duplicate exons (same gene, start, end)
     df_exon_nodup = df_exon.drop_duplicates(subset=["gene_id", "start", "end"], keep="first")
@@ -71,53 +150,11 @@ def prepare_exon_gtf(input_gtf_path, output_dir="./"):
     
     return df_exon_nodup
 
-# def exon_uniq(df_exon_nodup, gene):
-#     # Subset exons for the given gene
-#     _df_exon = df_exon_nodup.loc[df_exon_nodup["gene_id"] == gene].reset_index(drop=True).copy()
-
-#     # Create interval tree from exon start/end
-#     # tree = IntervalTree(Interval(row["start"], row["end"]) for _, row in _df_exon.iterrows())
-#     tree = IntervalTree(
-#         Interval(row["start"], row["end"])
-#         for _, row in _df_exon.iterrows()
-#         if row["start"] < row["end"]
-#     )
-    
-#     # Merge overlapping exons
-#     tree.merge_overlaps()
-    
-#     # Get sorted list of unique intervals
-#     merged_intervals = sorted([(iv.begin, iv.end) for iv in tree])
-
-#     # Assign merged coordinates to exons
-#     _df_exon["_start"] = math.nan
-#     _df_exon["_end"] = math.nan
-
-#     for k in range(_df_exon.shape[0]):
-#         for start, end in merged_intervals:
-#             if start <= _df_exon.at[k, "start"] and end >= _df_exon.at[k, "end"]:
-#                 _df_exon.at[k, "_start"] = start
-#                 _df_exon.at[k, "_end"] = end
-#                 break  # stop at first match
-
-#     # Warn if any exon did not get matched
-#     for i in range(_df_exon.shape[0]):
-#         if math.isnan(_df_exon.at[i, '_start']):
-#             print(f"Attention: {gene}, start={_df_exon.at[i,'start']}, end={_df_exon.at[i,'end']} was not assigned.")
-
-#     # Keep only unique exons based on merged coordinates
-#     _df_exon_out = _df_exon.drop_duplicates(subset=["_start", "_end"], keep="first").copy()
-#     _df_exon_out["start"] = _df_exon_out["_start"].astype(int)
-#     _df_exon_out["end"] = _df_exon_out["_end"].astype(int)
-#     _df_exon_out.drop(columns=["_start", "_end"], inplace=True)
-
-#     # Re-index exon numbers
-#     _df_exon_out = _df_exon_out.reset_index(drop=True)
-#     _df_exon_out["exon_number"] = _df_exon_out.index + 1
-
-#     return _df_exon_out
-
-def exon_uniq(df_exon_nodup: pd.DataFrame, gene: str) -> pd.DataFrame:
+def exon_uniq(
+    df_exon_nodup: pd.DataFrame,
+    gene: str = None,
+    gene_df: pd.DataFrame = None,
+) -> pd.DataFrame:
     """
     Merge overlapping exons for a single gene using interval trees.
 
@@ -136,8 +173,13 @@ def exon_uniq(df_exon_nodup: pd.DataFrame, gene: str) -> pd.DataFrame:
         invalid or cannot be matched to any merged region are excluded.
     """
 
-    # Subset exons for the given gene
-    _df_exon = df_exon_nodup.loc[df_exon_nodup["gene_id"] == gene].reset_index(drop=True).copy()
+    if gene_df is not None:
+        _df_exon = gene_df.reset_index(drop=True).copy()
+    else:
+        _df_exon = df_exon_nodup.loc[df_exon_nodup["gene_id"] == gene].reset_index(drop=True).copy()
+
+    if gene is None and not _df_exon.empty:
+        gene = _df_exon["gene_id"].iloc[0]
 
     # Return empty DataFrame if the gene has no exons
     if _df_exon.empty:
@@ -166,46 +208,77 @@ def exon_uniq(df_exon_nodup: pd.DataFrame, gene: str) -> pd.DataFrame:
     # Extract merged, sorted non-overlapping intervals
     merged_intervals = sorted([(iv.begin, iv.end) for iv in tree])
 
-    # Initialize columns for matched merged coordinates
-    _df_exon["_start"] = math.nan
-    _df_exon["_end"] = math.nan
-
-    # Assign each exon to the first merged interval that fully contains it
-    for k in range(_df_exon.shape[0]):
-        for start, end in merged_intervals:
-            if start <= _df_exon.at[k, "start"] and end >= _df_exon.at[k, "end"]:
-                _df_exon.at[k, "_start"] = start
-                _df_exon.at[k, "_end"] = end
-                break  # stop after the first match
-
-    # Warn about unmatched exons
-    unmatched = _df_exon[_df_exon["_start"].isna()]
-    for _, row in unmatched.iterrows():
-        print(f"[Warning] Gene {gene}: exon (start={row['start']}, end={row['end']}) was not assigned to any merged region.")
-
-    # Drop exons that failed to match any merged interval
-    _df_exon_out = _df_exon.dropna(subset=["_start", "_end"]).copy()
-
-    # If no exons remain after matching, return empty
-    if _df_exon_out.empty:
-        print(f"[Warning] Gene {gene} has no exons remaining after merging.")
+    if not merged_intervals:
+        print(f"[Warning] Gene {gene} has no merged exon intervals after processing.")
         return pd.DataFrame(columns=df_exon_nodup.columns)
 
-    # Remove duplicate merged intervals, keeping only one exon per interval
-    _df_exon_out = _df_exon_out.drop_duplicates(subset=["_start", "_end"], keep="first").copy()
+    template = _df_exon.iloc[0].copy()
+    rows = []
+    for exon_number, (start, end) in enumerate(merged_intervals, start=1):
+        row = template.copy()
+        row["start"] = int(start)
+        row["end"] = int(end)
+        row["exon_number"] = exon_number
+        rows.append(row)
 
-    # Convert merged coordinates to integer and replace original coordinates
-    _df_exon_out["start"] = _df_exon_out["_start"].astype(int)
-    _df_exon_out["end"] = _df_exon_out["_end"].astype(int)
-    _df_exon_out.drop(columns=["_start", "_end"], inplace=True)
+    return pd.DataFrame(rows, columns=_df_exon.columns)
 
-    # Re-index exon numbers
-    _df_exon_out = _df_exon_out.reset_index(drop=True)
-    _df_exon_out["exon_number"] = _df_exon_out.index + 1
 
-    return _df_exon_out
+def process_exons_in_memory(df_exon_nodup, flush_every=5000, timing_log_path=None):
+    """
+    Process gene groups fully in memory and only write the final outputs.
 
-def save_by_batch(df_exon_nodup, save_num=10000, output_dir="./"):
+    Compared with the legacy temp-pickle workflow, this avoids repeated disk
+    writes and repeated full-dataframe scans for every gene.
+    """
+    grouped = df_exon_nodup.groupby("gene_id", sort=False)
+    total_genes = grouped.ngroups
+
+    completed_chunks = []
+    current_chunk = []
+    chunk_start = perf_counter()
+    chunk_gene_count = 0
+    chunk_index = 0
+
+    for idx, (gene, gene_df) in enumerate(
+        tqdm(grouped, total=total_genes, desc="Processing all genes"),
+        start=1,
+    ):
+        processed = exon_uniq(df_exon_nodup, gene=gene, gene_df=gene_df)
+        if not processed.empty:
+            current_chunk.append(processed)
+        chunk_gene_count += 1
+
+        if idx % flush_every == 0 or idx == total_genes:
+            chunk_df = (
+                pd.concat(current_chunk, ignore_index=True)
+                if current_chunk
+                else pd.DataFrame(columns=df_exon_nodup.columns)
+            )
+            completed_chunks.append(chunk_df)
+            _append_timing_record(
+                timing_log_path,
+                f"process_exons_in_memory.chunk_{chunk_index}",
+                perf_counter() - chunk_start,
+                extra={
+                    "genes_in_chunk": chunk_gene_count,
+                    "processed_genes": int(idx),
+                    "rows_written": int(chunk_df.shape[0]),
+                    "flush_every": int(flush_every),
+                    "total_genes": int(total_genes),
+                },
+            )
+            chunk_index += 1
+            current_chunk = []
+            chunk_start = perf_counter()
+            chunk_gene_count = 0
+
+    if not completed_chunks:
+        return pd.DataFrame(columns=df_exon_nodup.columns)
+
+    return pd.concat(completed_chunks, ignore_index=True)
+
+def save_by_batch(df_exon_nodup, save_num=10000, output_dir="./", timing_log_path=None):
     """
     Process exon annotations for each gene in batches and save results as serialized .pkl files.
 
@@ -256,10 +329,13 @@ def save_by_batch(df_exon_nodup, save_num=10000, output_dir="./"):
     df_out = pd.DataFrame()
 
     # 5. Process all genes with a unified tqdm progress bar
+    batch_start = perf_counter()
+    batch_gene_count = 0
     for i, gene in enumerate(tqdm(gene_list, total=total_genes, desc="Processing all genes")):
         try:
             _temp = exon_uniq(df_exon_nodup, gene)
             df_out = pd.concat([df_out, _temp], ignore_index=True)
+            batch_gene_count += 1
 
             with open(log_path, "a") as f:
                 f.write(f"Batch {current_batch}, Processed gene: {gene}\n")
@@ -270,11 +346,26 @@ def save_by_batch(df_exon_nodup, save_num=10000, output_dir="./"):
 
         # Save this batch every save_num genes or at the end
         if (i + 1) % save_num == 0 or (i + 1 == total_genes):
+            rows_in_batch = int(df_out.shape[0])
             output_path = os.path.join(temp_dir, f"df_exon_gtf_{current_batch}.pkl")
             df_out.to_pickle(output_path)
             list_of_df.append(df_out)
+            _append_timing_record(
+                timing_log_path,
+                f"save_by_batch.batch_{current_batch}",
+                perf_counter() - batch_start,
+                extra={
+                    "genes_in_batch": batch_gene_count,
+                    "processed_genes": int(i + 1),
+                    "rows_written": rows_in_batch,
+                    "save_num": int(save_num),
+                    "total_genes": int(total_genes),
+                },
+            )
             df_out = pd.DataFrame()  # reset for next batch
             current_batch += 1
+            batch_start = perf_counter()
+            batch_gene_count = 0
     
     print(f"[Done] Finished saving all exon batches.")
 
@@ -350,15 +441,9 @@ def check_exon_overlap(gtf_df, expected_gene_list=None):
     # Get the start of the next exon within each gene
     df_check['_next_start'] = df_check.groupby('gene_id')['start'].shift(-1)
 
-    # Initialize overlap check column
-    df_check['_overlap'] = True
-
-    # Check if next exon starts after or at the end of current exon
-    for i in range(df_check.shape[0]):
-        if math.isnan(df_check.loc[i, '_next_start']):
-            df_check.loc[i, '_overlap'] = True  # Last exon of gene
-        else:
-            df_check.loc[i, '_overlap'] = df_check.loc[i, '_next_start'] >= df_check.loc[i, 'end']
+    df_check['_overlap'] = df_check['_next_start'].isna() | (
+        df_check['_next_start'] >= df_check['end']
+    )
 
     # Filter exons that overlap with the next one
     overlap_issues = df_check[df_check['_overlap'] == False]
@@ -403,20 +488,61 @@ def save_gtf_outputs(gtf_df, output_dir="./", base_name="dolphin.exon"):
         <output_dir>/dolphin_exon_gtf/<base_name>.gtf : GTF-format annotation file
         <output_dir>/dolphin_exon_gtf/<base_name>.pkl : Pickle-serialized DataFrame
     """
-    # Build full output paths
-    gtf_path = os.path.join(os.path.join(output_dir, "dolphin_exon_gtf", f"{base_name}.gtf"))
-    pkl_path = os.path.join(os.path.join(output_dir, "dolphin_exon_gtf", output_dir, f"{base_name}.pkl"))
+    reference_dir = os.path.join(os.path.abspath(output_dir), "dolphin_exon_gtf")
+    os.makedirs(reference_dir, exist_ok=True)
+
+    # Keep the original step0 naming and also emit the alignment-facing name used in step1.
+    gtf_path = os.path.join(reference_dir, f"{base_name}.gtf")
+    pkl_path = os.path.join(reference_dir, f"{base_name}.pkl")
+    alignment_gtf_path = os.path.join(reference_dir, "dolphin_exon_gtf.gtf")
+
+    gtf_output_df = gtf_df.copy()
+    if "gene_id" in gtf_output_df.columns and "transcript_id" not in gtf_output_df.columns:
+        # The DOLPHIN merged-exon reference is gene-centric. Provide a stable
+        # transcript_id so featureCounts -J can parse the GTF contract.
+        gtf_output_df["transcript_id"] = gtf_output_df["gene_id"]
+
+    fixed_cols = [col for col in gtf_output_df.columns[:8]]
+    preferred_attr_order = [
+        "gene_id",
+        "transcript_id",
+        "gene_name",
+        "exon_number",
+        "gene_version",
+        "gene_source",
+        "gene_biotype",
+        "gene_type",
+    ]
+    remaining_attr_cols = [
+        col for col in gtf_output_df.columns[8:]
+        if col not in preferred_attr_order
+    ]
+    ordered_attr_cols = [
+        col for col in preferred_attr_order if col in gtf_output_df.columns
+    ] + remaining_attr_cols
+    gtf_output_df = gtf_output_df[fixed_cols + ordered_attr_cols]
 
     # Write to GTF
-    gtfpy.writeGTF(gtf_df, gtf_path)
+    gtfpy.writeGTF(gtf_output_df, gtf_path)
 
     # Write to Pickle
     gtf_df.to_pickle(pkl_path)
 
+    if os.path.abspath(alignment_gtf_path) != os.path.abspath(gtf_path):
+        shutil.copyfile(gtf_path, alignment_gtf_path)
+
     print(f"GTF file saved to: {gtf_path}")
     print(f"Pickle file saved to: {pkl_path}")
+    print(f"Alignment GTF file saved to: {alignment_gtf_path}")
 
-def generate_nonoverlapping_exons(input_gtf_path: str, output_dir: str = "./", batch_size: int = 10000):
+    return gtf_path, pkl_path, alignment_gtf_path
+
+def generate_nonoverlapping_exons(
+    input_gtf_path: str,
+    output_dir: str = "./",
+    batch_size: int = 10000,
+    timing_log_path=None,
+):
     """
     End-to-end pipeline to process an Ensembl GTF file and generate non-overlapping exons per gene.
 
@@ -446,21 +572,299 @@ def generate_nonoverlapping_exons(input_gtf_path: str, output_dir: str = "./", b
         DataFrame of overlapping exons detected post-processing (if any).
     """
     
+    total_start = perf_counter()
+
     # Step 1: Load exon entries from GTF and remove duplicates
-    df_exon_nodup = prepare_exon_gtf(input_gtf_path, output_dir=output_dir)
+    df_exon_nodup = _run_timed_step(
+        "generate_nonoverlapping_exons.prepare_exon_gtf",
+        timing_log_path,
+        prepare_exon_gtf,
+        input_gtf_path,
+        output_dir=output_dir,
+        extra={"input_gtf_path": os.path.abspath(input_gtf_path)},
+    )
 
-    # Step 2: Process and save exons by gene in batches
-    save_by_batch(df_exon_nodup, save_num=batch_size, output_dir=output_dir)
+    # Step 2: Process exons in memory
+    def _process_exons():
+        return process_exons_in_memory(
+            df_exon_nodup,
+            flush_every=batch_size,
+            timing_log_path=timing_log_path,
+        )
 
-    # Step 3: Combine saved batches
-    gtf_all = combine_saved_batches(folder=output_dir)
+    gtf_all = _run_timed_step(
+        "generate_nonoverlapping_exons.process_exons_in_memory",
+        timing_log_path,
+        _process_exons,
+        extra={"flush_every": int(batch_size)},
+    )
 
-    # Step 4: Check for residual overlaps
-    overlap_issues = check_exon_overlap(gtf_all, expected_gene_list=df_exon_nodup["gene_id"].unique().tolist())
+    # Step 3: Check for residual overlaps
+    overlap_issues = _run_timed_step(
+        "generate_nonoverlapping_exons.check_exon_overlap",
+        timing_log_path,
+        check_exon_overlap,
+        gtf_all,
+        expected_gene_list=df_exon_nodup["gene_id"].unique().tolist(),
+    )
 
-    # Step 5: Save final GTF and pickle files
-    save_gtf_outputs(gtf_all, output_dir=output_dir)
+    # Step 4: Save final GTF and pickle files
+    _run_timed_step(
+        "generate_nonoverlapping_exons.save_gtf_outputs",
+        timing_log_path,
+        save_gtf_outputs,
+        gtf_all,
+        output_dir=output_dir,
+    )
+
+    _append_timing_record(
+        timing_log_path,
+        "generate_nonoverlapping_exons.total",
+        perf_counter() - total_start,
+        extra={
+            "batch_size": int(batch_size),
+            "gene_count": int(df_exon_nodup["gene_id"].nunique()),
+            "input_gtf_path": os.path.abspath(input_gtf_path),
+        },
+    )
     
     print(f"[Success] Exon GTF processing pipeline completed.")
 
     return gtf_all, overlap_issues
+
+
+def build_star_genome_index(
+    genome_fasta_path,
+    alignment_gtf_path,
+    output_dir,
+    star_executable="STAR",
+    run_thread_n=16,
+    genome_sa_sparse_d=None,
+    sjdb_overhang=None,
+):
+    """
+    Build a STAR genome index using the DOLPHIN alignment GTF.
+
+    Parameters
+    ----------
+    genome_fasta_path : str
+        Path to the genome FASTA file.
+    alignment_gtf_path : str
+        Path to the DOLPHIN alignment GTF file.
+    output_dir : str
+        Directory where STAR index files will be written.
+    star_executable : str, optional
+        STAR executable name or absolute path.
+    run_thread_n : int, optional
+        Number of threads to pass to STAR.
+    genome_sa_sparse_d : int, optional
+        Optional STAR ``--genomeSAsparseD`` value.
+    sjdb_overhang : int, optional
+        Optional STAR ``--sjdbOverhang`` value.
+
+    Returns
+    -------
+    dict
+        Manifest entries for the STAR index.
+    """
+    genome_fasta_path = os.path.abspath(genome_fasta_path)
+    alignment_gtf_path = os.path.abspath(alignment_gtf_path)
+    output_dir = os.path.abspath(output_dir)
+
+    if not os.path.isfile(genome_fasta_path):
+        raise FileNotFoundError(f"Genome FASTA not found: {genome_fasta_path}")
+    if not os.path.isfile(alignment_gtf_path):
+        raise FileNotFoundError(f"Alignment GTF not found: {alignment_gtf_path}")
+
+    star_path = _resolve_executable(star_executable)
+    os.makedirs(output_dir, exist_ok=True)
+
+    command = [
+        star_path,
+        "--runMode",
+        "genomeGenerate",
+        "--runThreadN",
+        str(int(run_thread_n)),
+        "--genomeDir",
+        output_dir,
+        "--genomeFastaFiles",
+        genome_fasta_path,
+        "--sjdbGTFfile",
+        alignment_gtf_path,
+    ]
+    if genome_sa_sparse_d is not None:
+        command.extend(["--genomeSAsparseD", str(int(genome_sa_sparse_d))])
+    if sjdb_overhang is not None:
+        command.extend(["--sjdbOverhang", str(int(sjdb_overhang))])
+
+    log_path = os.path.join(output_dir, "star_genome_generate.log")
+    print(f"[Step] Building STAR genome index in: {output_dir}")
+
+    with open(log_path, "w", encoding="utf-8") as log_handle:
+        log_handle.write("Command:\n")
+        log_handle.write(" ".join(command) + "\n\n")
+        try:
+            subprocess.run(
+                command,
+                check=True,
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+        except subprocess.CalledProcessError as exc:
+            raise RuntimeError(
+                f"STAR genomeGenerate failed. See log: {log_path}"
+            ) from exc
+
+    return {
+        "star_executable": star_path,
+        "star_index_dir": output_dir,
+        "star_genome_generate_log_path": log_path,
+        "run_thread_n": int(run_thread_n),
+        "genome_sa_sparse_d": (
+            int(genome_sa_sparse_d) if genome_sa_sparse_d is not None else None
+        ),
+        "sjdb_overhang": int(sjdb_overhang) if sjdb_overhang is not None else None,
+    }
+
+
+def prepare_reference_bundle(
+    input_gtf_path: str,
+    output_dir: str = "./",
+    batch_size: int = 10000,
+    genome_fasta_path: str = None,
+    star_executable: str = "STAR",
+    star_threads: int = 16,
+    star_index_dir: str = None,
+    genome_sa_sparse_d: int = None,
+    sjdb_overhang: int = None,
+):
+    """
+    Generate all reference files needed by downstream DOLPHIN preprocessing.
+
+    This wraps the exon-level GTF generation and adjacency metadata generation
+    into a single step so users can prepare the alignment and graph references
+    from one input Ensembl GTF.
+
+    Parameters
+    ----------
+    input_gtf_path : str
+        Path to the input Ensembl-format GTF file.
+    output_dir : str, optional
+        Parent directory that will contain the ``dolphin_exon_gtf`` folder.
+    batch_size : int, optional
+        Number of genes to process per intermediate batch.
+    genome_fasta_path : str, optional
+        Path to the genome FASTA file. If provided, STAR genomeGenerate will
+        be run after the DOLPHIN GTF bundle is created.
+    star_executable : str, optional
+        STAR executable name or absolute path.
+    star_threads : int, optional
+        Number of threads to use for STAR genomeGenerate.
+    star_index_dir : str, optional
+        Output directory for the STAR index. Defaults to
+        ``<reference_dir>/star_index``.
+    genome_sa_sparse_d : int, optional
+        Optional STAR ``--genomeSAsparseD`` value.
+    sjdb_overhang : int, optional
+        Optional STAR ``--sjdbOverhang`` value.
+
+    Returns
+    -------
+    dict
+        A manifest describing the generated reference files.
+    """
+    from .generate_adj_index import generate_adj_index_table, generate_adj_metadata_table
+
+    reference_dir = os.path.join(os.path.abspath(output_dir), "dolphin_exon_gtf")
+    timing_log_path = os.path.join(reference_dir, "step_timing.tsv")
+    _init_timing_log(timing_log_path)
+
+    total_start = perf_counter()
+
+    gtf_all, overlap_issues = generate_nonoverlapping_exons(
+        input_gtf_path=input_gtf_path,
+        output_dir=output_dir,
+        batch_size=batch_size,
+        timing_log_path=timing_log_path,
+    )
+
+    exon_gtf = os.path.join(reference_dir, "dolphin.exon.gtf")
+    alignment_gtf = os.path.join(reference_dir, "dolphin_exon_gtf.gtf")
+    exon_pkl = os.path.join(reference_dir, "dolphin.exon.pkl")
+
+    _run_timed_step(
+        "prepare_reference_bundle.generate_adj_index_table",
+        timing_log_path,
+        generate_adj_index_table,
+        exon_pkl,
+        output_dir=reference_dir,
+    )
+    _run_timed_step(
+        "prepare_reference_bundle.generate_adj_metadata_table",
+        timing_log_path,
+        generate_adj_metadata_table,
+        exon_pkl,
+        output_dir=reference_dir,
+    )
+
+    star_index_manifest = None
+    if genome_fasta_path is not None:
+        resolved_star_index_dir = (
+            os.path.abspath(star_index_dir)
+            if star_index_dir is not None
+            else os.path.join(reference_dir, "star_index")
+        )
+        star_index_manifest = _run_timed_step(
+            "prepare_reference_bundle.build_star_genome_index",
+            timing_log_path,
+            build_star_genome_index,
+            genome_fasta_path=genome_fasta_path,
+            alignment_gtf_path=alignment_gtf,
+            output_dir=resolved_star_index_dir,
+            star_executable=star_executable,
+            run_thread_n=star_threads,
+            genome_sa_sparse_d=genome_sa_sparse_d,
+            sjdb_overhang=sjdb_overhang,
+        )
+
+    total_seconds = perf_counter() - total_start
+    _append_timing_record(
+        timing_log_path,
+        "prepare_reference_bundle.total",
+        total_seconds,
+        extra={
+            "batch_size": int(batch_size),
+            "input_gtf_path": os.path.abspath(input_gtf_path),
+        },
+    )
+
+    manifest = {
+        "input_gtf_path": os.path.abspath(input_gtf_path),
+        "reference_dir": reference_dir,
+        "exon_gtf_path": exon_gtf,
+        "alignment_gtf_path": alignment_gtf,
+        "exon_pkl_path": exon_pkl,
+        "adj_index_path": os.path.join(reference_dir, "dolphin_adj_index.csv"),
+        "adj_metadata_path": os.path.join(reference_dir, "dolphin_adj_metadata_table.csv"),
+        "gene_metadata_path": os.path.join(reference_dir, "dolphin_gene_meta.csv"),
+        "overlap_issue_count": int(overlap_issues.shape[0]),
+        "gene_count": int(gtf_all["gene_id"].nunique()),
+        "exon_count": int(gtf_all.shape[0]),
+        "timing_log_path": timing_log_path,
+        "total_seconds": total_seconds,
+        "genome_fasta_path": (
+            os.path.abspath(genome_fasta_path)
+            if genome_fasta_path is not None
+            else None
+        ),
+        "star_index": star_index_manifest,
+    }
+
+    manifest_path = os.path.join(reference_dir, "reference_manifest.json")
+    with open(manifest_path, "w", encoding="utf-8") as handle:
+        json.dump(manifest, handle, indent=2, sort_keys=True)
+
+    print(f"Reference manifest saved to: {manifest_path}")
+
+    return manifest

@@ -1,0 +1,4 @@
+interface:
+  display_name: "DOLPHIN Pipeline"
+  short_description: "Run finalized DOLPHIN workflows"
+  default_prompt: "Use $dolphin-pipeline to run or inspect the finalized DOLPHIN pipeline from preprocessing through embedding and downstream analyses."

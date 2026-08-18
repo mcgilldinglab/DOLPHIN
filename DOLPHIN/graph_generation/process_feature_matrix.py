@@ -3,9 +3,9 @@ import math
 import anndata
 import os
 import pandas as pd
-import torch
-from .func_step01_fea_mat_main_part1 import combine_fea
+from .func_step01_fea_mat_main_part1 import combine_fea, build_feature_var_annotation
 from .func_step01_fea_mat_main_part2 import fea_comp
+from ._anndata_compat import enable_nullable_string_writes
 
 def run_feature_combination(
     metadata_path: str,
@@ -63,6 +63,10 @@ def run_feature_combination(
     os.makedirs(final_out_dir, exist_ok=True)
     temp_out_dir = os.path.join(final_out_dir, "temp")
     os.makedirs(temp_out_dir, exist_ok=True)
+    feature_var = build_feature_var_annotation(
+        gene_annotation=gene_annotation,
+        gtf_pkl_path=gtf_pkl_path,
+    )
 
     print("Start Combining Feature Matrix...")
     with tqdm(total=total_sample_size, desc="Combining Features") as pbar_fea:
@@ -76,7 +80,8 @@ def run_feature_combination(
                 start_idx=i,
                 sample_num=fea_run_num,
                 output_path=temp_out_dir,
-                output_name=out_name
+                output_name=out_name,
+                feature_var=feature_var,
             )
     
     #### combine all feature .h5ad files
@@ -87,6 +92,7 @@ def run_feature_combination(
             combine_anndata_fea = _temp_ad
         else:
             combine_anndata_fea = combine_anndata_fea.concatenate(_temp_ad, index_unique = None, batch_key = None)
+    enable_nullable_string_writes()
     combine_anndata_fea.write(os.path.join(final_out_dir, "Feature_"+out_name+".h5ad"))
 
     fea_comp(final_out_dir, out_name)

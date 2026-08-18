@@ -102,15 +102,24 @@ def writeGTF(inGTF,file_path):
     cols=inGTF.columns.tolist()
     if len(cols) == 9:
         if 'attribute' in cols:
-            df=inGTF
+            df=inGTF.copy()
+        else:
+            df=inGTF.copy()
+            df['attribute']=""
     else:
-        df=inGTF[cols[:8]]
-        df['attribute']=""
-        for c in cols[8:]:
-            if c == cols[len(cols)-1]:
-                df['attribute']=df['attribute']+c+' "'+inGTF[c].astype(str)+'";'
-            else:
-                df['attribute']=df['attribute']+c+' "'+inGTF[c].astype(str)+'"; '
+        df=inGTF[cols[:8]].copy()
+        attr_cols=cols[8:]
+
+        def build_attribute(row):
+            attrs=[]
+            for c in attr_cols:
+                value=row[c]
+                if pd.isna(value):
+                    continue
+                attrs.append(f'{c} "{value}";')
+            return " ".join(attrs)
+
+        df['attribute']=inGTF[attr_cols].apply(build_attribute, axis=1)
     df.to_csv(file_path, sep="\t",header=None,index=None,quoting=csv.QUOTE_NONE)
 
 def GTFtoBED(inGTF,name):

@@ -25,10 +25,45 @@ Note:
 
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
-import networkx as nx
 import os
-from tqdm import tqdm
+
+from .grouped_featurecounts import (
+    extract_grouped_cell_exon_counts,
+    extract_grouped_cell_junction_counts,
+)
+
+try:
+    from ._count_adj_cython import count_adj_flat as cython_count_adj_flat
+except ImportError:
+    cython_count_adj_flat = None
+
+ENABLE_COUNT_ADJ_CYTHON = os.environ.get("DOLPHIN_ENABLE_COUNT_ADJ_CYTHON", "0") == "1"
+
+
+GROUPED_EXON_COUNTS = None
+GROUPED_JUNCTION_COUNTS = None
+EXON_POSITION_COLUMN = "__dolphin_exon_pos"
+
+
+def configure_grouped_count_sources(exon_counts=None, junction_counts=None):
+    global GROUPED_EXON_COUNTS, GROUPED_JUNCTION_COUNTS
+    GROUPED_EXON_COUNTS = exon_counts
+    GROUPED_JUNCTION_COUNTS = junction_counts
+
+
+def build_reference_lookups(gtf, adj_ind):
+    gene_index_map = {
+        gene_id: gene_indices.to_list()
+        for gene_id, gene_indices in gtf.groupby("Geneid").groups.items()
+    }
+    adj_start_by_gene = (
+        adj_ind[["geneid", "ind_st"]]
+        .drop_duplicates(subset=["geneid"])
+        .set_index("geneid")["ind_st"]
+        .astype(int)
+        .to_dict()
+    )
+    return gene_index_map, adj_start_by_gene
 
 """
 Load all the necessary files
@@ -49,7 +84,19 @@ def get_gtf(path_gtf, path_adj_index):
 gene class
 """
 class gene(object):
-    def __init__(self, gtf, adj_ind, srr, id = "", show = "N", ck = "N", main_path="./"):
+    def __init__(
+        self,
+        gtf,
+        adj_ind,
+        srr,
+        id = "",
+        show = "N",
+        ck = "N",
+        main_path="./",
+        gene_index_map=None,
+        adj_start_by_gene=None,
+        verbose=False,
+    ):
         self.srr = srr
         self.id = id #if id == "", then will run the entire cell
         self.show = show #if show == "Y", will show all before and after adj table, show visualization,default is N
@@ -61,46 +108,203 @@ class gene(object):
         self.gtf = gtf
         self.adj_ind = adj_ind
         self.main_path = main_path
+        self._cell_exon_counts = None
+        self._cell_junction_counts = None
+        self._cell_exon_by_gene = None
+        self._cell_junction_by_gene = None
+        self._empty_exon_counts = None
+        self._empty_junction_counts = None
+        self._gene_exon_template_cache = {}
+        self._current_exon_start = None
+        self._current_exon_end = None
+        self._current_exon_count = None
+        self.gene_index_map = gene_index_map or {}
+        self.adj_start_by_gene = adj_start_by_gene or {}
+        self.verbose = bool(verbose)
+
+    def _using_grouped_counts(self):
+        return GROUPED_EXON_COUNTS is not None and GROUPED_JUNCTION_COUNTS is not None
+
+    def _load_cell_exon_counts(self):
+        if self._cell_exon_counts is not None:
+            return self._cell_exon_counts
+
+        if self._using_grouped_counts():
+            df_temp_exon = extract_grouped_cell_exon_counts(
+                grouped_exon_counts=GROUPED_EXON_COUNTS,
+                cell_id=self.srr,
+            )
+        else:
+            df_temp_exon = pd.read_csv(
+                os.path.join(self.main_path, "05_exon_junct_cnt", self.srr + ".exon.count.txt"),
+                skiprows=1,
+                sep='\t',
+                low_memory=False,
+            )
+            df_temp_exon.columns.values[6] = "Count"
+            df_temp_exon = df_temp_exon[df_temp_exon["Count"] > 0]
+            df_temp_exon["Type"] = "Exon"
+
+        self._cell_exon_counts = df_temp_exon
+        return self._cell_exon_counts
+
+    def _load_cell_exon_by_gene(self):
+        if self._cell_exon_by_gene is not None:
+            return self._cell_exon_by_gene
+
+        df_temp_exon = self._load_cell_exon_counts()
+        self._empty_exon_counts = df_temp_exon.iloc[0:0].copy()
+        if not df_temp_exon.empty:
+            df_temp_exon = (
+                df_temp_exon.groupby(
+                    ["Geneid", "Chr", "Start", "End", "Type"],
+                    sort=False,
+                    as_index=False,
+                )["Count"]
+                .sum()
+            )
+        self._cell_exon_by_gene = {
+            gene_id: self._annotate_exon_positions(gene_id, dataframe)
+            for gene_id, dataframe in df_temp_exon.groupby("Geneid", sort=False)
+        }
+        return self._cell_exon_by_gene
+
+    def _annotate_exon_positions(self, gene_id, dataframe):
+        if dataframe.empty:
+            return dataframe
+
+        original_gene_id = self.id
+        self.id = gene_id
+        _, _, position_map, _, _ = self._get_gene_exon_template()
+        self.id = original_gene_id
+
+        annotated = dataframe.copy()
+        annotated[EXON_POSITION_COLUMN] = [
+            position_map[(row.Chr, row.Geneid, row.Start, row.End)]
+            for row in annotated.itertuples(index=False)
+        ]
+        return annotated
+
+    def _load_cell_junction_counts(self):
+        if self._cell_junction_counts is not None:
+            return self._cell_junction_counts
+
+        if self._using_grouped_counts():
+            df_temp_sj = extract_grouped_cell_junction_counts(
+                grouped_junction_counts=GROUPED_JUNCTION_COUNTS,
+                cell_id=self.srr,
+            )
+        else:
+            df_temp_sj = pd.read_csv(
+                os.path.join(self.main_path, "05_exon_junct_cnt", self.srr + ".exon.count.txt.jcounts"),
+                skiprows=0,
+                sep='\t',
+                low_memory=False,
+            )
+            df_temp_sj = extract_grouped_cell_junction_counts(
+                grouped_junction_counts=df_temp_sj,
+                cell_id=df_temp_sj.columns[-1],
+            )
+
+        self._cell_junction_counts = df_temp_sj
+        return self._cell_junction_counts
+
+    def _load_cell_junction_by_gene(self):
+        if self._cell_junction_by_gene is not None:
+            return self._cell_junction_by_gene
+
+        df_temp_sj = self._load_cell_junction_counts()
+        self._empty_junction_counts = df_temp_sj.iloc[0:0].copy()
+        self._cell_junction_by_gene = {
+            gene_id: dataframe
+            for gene_id, dataframe in df_temp_sj.groupby("Geneid", sort=False)
+        }
+        return self._cell_junction_by_gene
+
+    def _get_gene_exon_template(self):
+        cached_template = self._gene_exon_template_cache.get(self.id)
+        if cached_template is not None:
+            return cached_template
+
+        gene_indices = self.gene_index_map.get(self.id)
+        if gene_indices is None:
+            template = self.gtf[(self.gtf["Geneid"] == self.id)][
+                ["Chr", "Geneid", "Start", "End"]
+            ].copy()
+        else:
+            template = self.gtf.loc[gene_indices, ["Chr", "Geneid", "Start", "End"]].copy()
+        template["Count"] = 0.0
+        template["Type"] = "Exon"
+        template_index = pd.MultiIndex.from_frame(
+            template[["Chr", "Geneid", "Start", "End"]]
+        )
+        position_map = {
+            exon_key: index
+            for index, exon_key in enumerate(template_index.tolist())
+        }
+        exon_start = template["Start"].to_numpy(dtype=np.int64, copy=False)
+        exon_end = template["End"].to_numpy(dtype=np.int64, copy=False)
+        cached_template = (
+            template,
+            template_index,
+            position_map,
+            exon_start,
+            exon_end,
+        )
+        self._gene_exon_template_cache[self.id] = cached_template
+        return cached_template
 
     """
     Get the gene list for each individual cell
     """
     def get_gene(self):
-        df_temp_exon = pd.read_csv(os.path.join(self.main_path, "05_exon_junct_cnt", self.srr + ".exon.count.txt"), skiprows = 1, sep = '\t',low_memory=False)
-        df_temp_exon.columns.values[6] = "Count"
-        df_temp_exon = df_temp_exon[df_temp_exon["Count"] > 0]
-        df_count_gene = df_temp_exon.groupby(['Geneid'])['Geneid'].count().reset_index(name='count')
-        #convert gene to list, only run exist gene per cell, not run all genes in gtf
-        self.gene_list = df_count_gene['Geneid'].tolist()
+        exon_by_gene = self._load_cell_exon_by_gene()
+        #convert gene to sorted list, only run exist gene per cell, not run all genes in gtf
+        self.gene_list = sorted(exon_by_gene)
 
     """
     Read the exon count table and only keep count number > 0
     """
     def exon_read(self):
-        df_temp_exon = pd.read_csv(os.path.join(self.main_path, "05_exon_junct_cnt", self.srr + ".exon.count.txt"), skiprows = 1, sep = '\t',low_memory=False)
-        df_temp_exon.columns.values[6] = "Count"
-        df_temp_exon = df_temp_exon[df_temp_exon["Count"] > 0]
-        df_temp_exon["Type"] = "Exon"
-        df_exon = df_temp_exon[(df_temp_exon['Geneid']==self.id)]
-        #modify exon if some exon is missing from annotation file, to make sure all the cell have the same amout of exons
-        df_gtf = self.gtf[(self.gtf["Geneid"] == self.id)]
-        self.exon_table = pd.merge(df_gtf,df_exon,on=["Chr","Geneid", "Start", "End"], how="outer")
-        self.exon_table["Count"] = self.exon_table["Count"].fillna(0)
-        self.exon_table["Type"] = self.exon_table["Type"].fillna("Exon")
+        exon_by_gene = self._load_cell_exon_by_gene()
+        if self._empty_exon_counts is None:
+            self._empty_exon_counts = self._load_cell_exon_counts().iloc[0:0].copy()
+        df_exon = exon_by_gene.get(self.id, self._empty_exon_counts)
+        (
+            template,
+            _template_index,
+            _position_map,
+            exon_start,
+            exon_end,
+        ) = self._get_gene_exon_template()
+        exon_counts = np.zeros(len(template), dtype=np.float64)
+        if not df_exon.empty:
+            exon_positions = df_exon[EXON_POSITION_COLUMN].to_numpy(
+                dtype=np.int64,
+                copy=False,
+            )
+            exon_values = df_exon["Count"].to_numpy(dtype=np.float64, copy=False)
+            np.add.at(exon_counts, exon_positions, exon_values)
+        self._current_exon_start = exon_start
+        self._current_exon_end = exon_end
+        self._current_exon_count = exon_counts
+        if (self.ck.upper() == "Y") or (self.show.upper() == "Y"):
+            exon_table = template.copy()
+            exon_table["Count"] = exon_counts
+            self.exon_table = exon_table
+        else:
+            self.exon_table = pd.DataFrame()
     
     """
     Read the junction count table and clean
     """
     def jun_read(self):
-        df_temp_sj = pd.read_csv(os.path.join(self.main_path, "05_exon_junct_cnt", self.srr + ".exon.count.txt.jcounts"), skiprows = 0, sep = '\t')
-        df_temp_sj.columns.values[8] = "Count"
-
-        #remove junction if primary gene is NaN
-        df_temp_sj = df_temp_sj.dropna(subset=['PrimaryGene'])
-        df_temp_sj = df_temp_sj[["PrimaryGene","Site1_chr","Site1_location","Site2_location","Count"]]
-        df_temp_sj = df_temp_sj.rename(columns={"PrimaryGene":"Geneid","Site1_chr":"Chr","Site1_location":"Start","Site2_location":"End"})
-        df_temp_sj["Type"] = "Junction"
-        self.junct_table = df_temp_sj[(df_temp_sj['Geneid']==self.id)]
+        junction_by_gene = self._load_cell_junction_by_gene()
+        if self._empty_junction_counts is None:
+            self._empty_junction_counts = (
+                self._load_cell_junction_counts().iloc[0:0].copy()
+            )
+        self.junct_table = junction_by_gene.get(self.id, self._empty_junction_counts)
     
     """
     Combine exon and junction table in order to check
@@ -117,121 +321,231 @@ class gene(object):
     Define FEATURE MATRIX, one exon has feature matrix N * 1, one gene has N * N.
     """
     def count_fea(self):
-        #define number of node = number of exon
-        n_node = len(self.exon_table)
-        
         #node feature
-        node_feature = self.exon_table.sort_values('Start').reset_index()
-        node_feature.drop(["Geneid","Chr","Start","End","index","Strand","Length","Type"],axis=1,inplace=True)
-
-        #covert to matrix
-        self.feat_mat = np.zeros(shape=(n_node,1))
-        for i in range(0,n_node):
-            self.feat_mat[i][0] = node_feature["Count"][i]
+        if self._current_exon_count is not None:
+            node_feature = self._current_exon_count
+        else:
+            node_feature = (
+                self.exon_table.sort_values("Start")["Count"]
+                .to_numpy(dtype=np.float64, copy=False)
+            )
+        self.feat_mat = node_feature.reshape(-1, 1)
 
     """
     Define ADJACENCY MATRIX, one exon has adj matrix N * N
     """
     def count_adj(self):
-        n_node = len(self.exon_table)
-        #1. initialize all list
-        _exon_list = [] #original exon locations
-        _jun_list = [] #original junction locations
-        _wgt_list = [] #edge weight correspoding to jucntion read
-
-        for i in range(self.exon_table.shape[0]):
-            _exon_list.append([self.exon_table.iloc[i]['Start'],self.exon_table.iloc[i]['End']])
-        for j in range(self.junct_table.shape[0]):
-            _jun_list.append([self.junct_table.iloc[j]['Start'],self.junct_table.iloc[j]['End']])
-            _wgt_list.append(self.junct_table.iloc[j]['Count'])
-
-        _out_list = [[np.nan,np.nan] for _ in range(len(_jun_list))] #output adjacent list
-
-        #label each junction about which slot they are in,len(_out_list) = len(_jun_list)
-        #start and end check seperately
-        for k in range(len(_jun_list)):
-            for l in range(n_node):
-                for m in (0,1): #0 for start, 1 for end:
-                    #junction falls before first exon
-                    if _jun_list[k][m] < _exon_list[0][0]:
-                        _out_list[k][m] = -1
-                    #junction falls into exon region:
-                    elif (_exon_list[l][0] <= _jun_list[k][m] <= _exon_list[l][1]):
-                        _out_list[k][m] = l
-                    #junction falls into exon-exon region:
-                    elif l < n_node-2: 
-                        if (_exon_list[l][1] < _jun_list[k][m] < _exon_list[l+1][0]):
-                            _out_list[k][m] = l+0.5
-                    #junction greater then the last exon end:
-                    elif (l == n_node-1) & (_exon_list[l][1] < _jun_list[k][m]):
-                        _out_list[k][m] = l+0.5
-        
-        #postprocess of edge dataset
-        _start = [i[0] for i in _out_list]
-        _end = [i[1] for i in _out_list]
-        _df_adj = pd.DataFrame(list(zip(_out_list,_start,_end,_wgt_list)),columns = ["edge_orig","start","end","weight"])
-        _df_adj_orig = _df_adj
-        _df_adj["edge_orig"] = _df_adj["edge_orig"].astype("str")
-        _df_adj["_status"] = ""
-        _df_adj["edge_mod"] = ""
-        #only modify edge which may influency matrix
-        for k in range(_df_adj.shape[0]):
-            #1.entire junction before or within first exon- delete
-            if _df_adj['start'][k] == _df_adj['end'][k] == -1:
-                _df_adj.loc[k,'_status'] = "D"
-            #2.junction after last exon - delete
-            elif (_df_adj['start'][k] == _df_adj['end'][k] > n_node-0.5):
-                _df_adj.loc[k,'_status'] = "D"
-            #3.junction falls into beween exon.
-            else:
-                if _df_adj['start'][k] % 1 == 0.5:
-                    _df_adj.loc[k, 'start'] = _df_adj['start'][k] - 0.5
-                if _df_adj['end'][k] % 1 == 0.5:
-                    #after the last exon will be end at last exon
-                    if int(_df_adj['end'][k] +0.5) >= n_node:
-                        _df_adj.loc[k, 'end'] = n_node-1
-                    else:  
-                    #else be end at the next exon 
-                        _df_adj.loc[k, 'end'] = _df_adj['end'][k] + 0.5
-             #4.junction with exon, will keep since not influcen adjency matrix
-            _df_adj.loc[k,"edge_mod"] = "["+str(_df_adj["start"][k])+", "+str(_df_adj["end"][k])+"]"
-
-        #add dummy junction if no junction data in between, with weight equal -99(1)!!!!!!!!!!
-        _df_ck_adj = _df_adj[["start","end"]]
-
-        #if more than 1 node but junction table is empty, need to add dummy junction between nodes
-        if n_node > 1 and _df_adj.empty:
-            for j in range(1,n_node+1):
-                _df_adj = pd.concat([_df_adj, pd.DataFrame.from_records([{"edge_mod":"["+str(j-1)+", "+str(j)+"]","start":j-1, "end":j,"weight":1, "_status": "A" }])], ignore_index= True)
-            _df_adj_sum = _df_adj
-        #delete any edges if there is only one node
-        elif(n_node == 1):
-            _df_adj_sum = pd.DataFrame()
+        if self._current_exon_start is not None and self._current_exon_end is not None:
+            exon_start = self._current_exon_start
+            exon_end = self._current_exon_end
+            n_node = len(exon_start)
         else:
-            #add dummy junction and assign weight with 1, 
-            """
-            if the feature matrix has count = 0 at this node, which cannot assign to 1, should be zero, 
-            right now, this  patch is fixed by program "compact_matrix.ipynb" <= THIS NEED TO BE FIXED HERE THOUGH
-            """
-            for j in range(1,n_node):
-                if not ([True,  True] in np.equal.outer(_df_ck_adj.to_numpy(copy=False),  [j-1,j]).any(axis=1).tolist()):
-                    _df_adj = pd.concat([_df_adj, pd.DataFrame.from_records([{"edge_mod":"["+str(j-1)+", "+str(j)+"]","start":j-1, "end":j,"weight":1, "_status": "A" }])], ignore_index= True)
-            #summary dataframe by edge
-            _df_adj_sum = _df_adj.groupby( ['edge_mod','start','end','_status'], as_index=False).sum(numeric_only=True)
+            n_node = len(self.exon_table)
+            exon_start = self.exon_table["Start"].to_numpy(dtype=np.int64, copy=False)
+            exon_end = self.exon_table["End"].to_numpy(dtype=np.int64, copy=False)
+        junction_start = self.junct_table["Start"].to_numpy(dtype=np.int64, copy=False)
+        junction_end = self.junct_table["End"].to_numpy(dtype=np.int64, copy=False)
+        junction_weight = self.junct_table["Count"].to_numpy(dtype=np.float64, copy=False)
+        need_debug = (self.ck.upper() == "Y") or (self.show.upper() == "Y")
 
-            #if A exist in the dataframe, add 1 on other junctions
-            if "A" in _df_adj_sum['_status'].values:
-                _df_adj_sum.loc[_df_adj_sum['_status'] != "A", "weight"] = _df_adj_sum["weight"] + 1
-            
-            #delete dataframe with "D" status
-            for k in range(_df_adj_sum.shape[0]):
-                #1.entire junction before or within first exon- delete
-                if (_df_adj_sum['_status'][k] == "D"):
-                    _df_adj_sum=_df_adj_sum.drop(_df_adj_sum.index[k])
-            _df_adj_sum = _df_adj_sum.reset_index().drop(columns=["index"])
+        if (
+            ENABLE_COUNT_ADJ_CYTHON
+            and (not need_debug)
+            and cython_count_adj_flat is not None
+        ):
+            self.adj_mat = cython_count_adj_flat(
+                np.asarray(exon_start, dtype=np.int64),
+                np.asarray(exon_end, dtype=np.int64),
+                np.asarray(junction_start, dtype=np.int64),
+                np.asarray(junction_end, dtype=np.int64),
+                np.asarray(junction_weight, dtype=np.float64),
+            )
+            return
+
+        def _locate_junction_positions(positions):
+            if positions.size == 0:
+                return np.array([], dtype=np.float64)
+
+            located = np.full(positions.shape, np.nan, dtype=np.float64)
+            before_first = positions < exon_start[0]
+            located[before_first] = -1.0
+
+            candidate = np.searchsorted(exon_start, positions, side="right") - 1
+            valid_candidate = candidate >= 0
+            safe_candidate = np.clip(candidate, 0, n_node - 1)
+            next_candidate = np.clip(safe_candidate + 1, 0, n_node - 1)
+
+            inside_exon = valid_candidate & (positions <= exon_end[safe_candidate])
+            located[inside_exon] = safe_candidate[inside_exon].astype(np.float64)
+
+            between_exons = (
+                np.isnan(located)
+                & valid_candidate
+                & (candidate < n_node - 2)
+                & (positions > exon_end[safe_candidate])
+                & (positions < exon_start[next_candidate])
+            )
+            located[between_exons] = safe_candidate[between_exons].astype(np.float64) + 0.5
+
+            after_last = (
+                np.isnan(located)
+                & (safe_candidate == n_node - 1)
+                & (positions > exon_end[-1])
+            )
+            located[after_last] = safe_candidate[after_last].astype(np.float64) + 0.5
+            return located
+
+        start_slots = _locate_junction_positions(junction_start)
+        end_slots = _locate_junction_positions(junction_end)
+        start_vals = start_slots.copy()
+        end_vals = end_slots.copy()
+        status_vals = np.zeros(start_vals.shape[0], dtype=np.int8)  # 0=normal, 1=delete, 2=added
+
+        delete_mask = (
+            ((start_vals == -1) & (end_vals == -1))
+            | ((start_vals == end_vals) & (start_vals > n_node - 0.5))
+        )
+        status_vals[delete_mask] = 1
+
+        active_mask = status_vals != 1
+        start_half_mask = active_mask & np.isclose(np.mod(start_vals, 1.0), 0.5)
+        start_vals[start_half_mask] = start_vals[start_half_mask] - 0.5
+
+        end_half_mask = active_mask & np.isclose(np.mod(end_vals, 1.0), 0.5)
+        if np.any(end_half_mask):
+            adjusted_end = end_vals[end_half_mask].copy()
+            end_last_mask = (adjusted_end + 0.5).astype(int) >= n_node
+            adjusted_end[end_last_mask] = n_node - 1
+            adjusted_end[~end_last_mask] = adjusted_end[~end_last_mask] + 0.5
+            end_vals[end_half_mask] = adjusted_end
+
+        if n_node > 1 and start_vals.size == 0:
+            final_start = np.arange(0, n_node, dtype=np.float64)
+            final_end = np.arange(1, n_node + 1, dtype=np.float64)
+            final_weight = np.ones(n_node, dtype=np.float64)
+            final_status = np.full(n_node, 2, dtype=np.int8)
+        elif n_node == 1:
+            final_start = np.array([], dtype=np.float64)
+            final_end = np.array([], dtype=np.float64)
+            final_weight = np.array([], dtype=np.float64)
+            final_status = np.array([], dtype=np.int8)
+        else:
+            existing_edges = set(zip(start_vals.tolist(), end_vals.tolist()))
+            added_start = []
+            added_end = []
+            for j in range(1, n_node):
+                if (j - 1, j) not in existing_edges:
+                    added_start.append(float(j - 1))
+                    added_end.append(float(j))
+
+            if added_start:
+                start_work = np.concatenate(
+                    [start_vals, np.asarray(added_start, dtype=np.float64)]
+                )
+                end_work = np.concatenate(
+                    [end_vals, np.asarray(added_end, dtype=np.float64)]
+                )
+                weight_work = np.concatenate(
+                    [
+                        junction_weight,
+                        np.ones(len(added_start), dtype=np.float64),
+                    ]
+                )
+                status_work = np.concatenate(
+                    [
+                        status_vals,
+                        np.full(len(added_start), 2, dtype=np.int8),
+                    ]
+                )
+            else:
+                start_work = start_vals
+                end_work = end_vals
+                weight_work = junction_weight
+                status_work = status_vals
+
+            aggregated_edges = {}
+            for start_value, end_value, weight_value, status_value in zip(
+                start_work.tolist(),
+                end_work.tolist(),
+                weight_work.tolist(),
+                status_work.tolist(),
+            ):
+                edge_key = (start_value, end_value, int(status_value))
+                aggregated_edges[edge_key] = (
+                    aggregated_edges.get(edge_key, 0.0) + float(weight_value)
+                )
+
+            has_added_edge = any(
+                status_value == 2
+                for _, _, status_value in aggregated_edges
+            )
+            final_rows = []
+            for (start_value, end_value, status_value), weight_value in aggregated_edges.items():
+                if status_value == 1:
+                    continue
+                if has_added_edge and status_value != 2:
+                    weight_value = weight_value + 1.0
+                final_rows.append(
+                    (
+                        start_value,
+                        end_value,
+                        weight_value,
+                        status_value,
+                    )
+                )
+
+            if final_rows:
+                final_start = np.asarray(
+                    [row[0] for row in final_rows],
+                    dtype=np.float64,
+                )
+                final_end = np.asarray(
+                    [row[1] for row in final_rows],
+                    dtype=np.float64,
+                )
+                final_weight = np.asarray(
+                    [row[2] for row in final_rows],
+                    dtype=np.float64,
+                )
+                final_status = np.asarray(
+                    [row[3] for row in final_rows],
+                    dtype=np.int8,
+                )
+            else:
+                final_start = np.array([], dtype=np.float64)
+                final_end = np.array([], dtype=np.float64)
+                final_weight = np.array([], dtype=np.float64)
+                final_status = np.array([], dtype=np.int8)
+
+        if need_debug:
+            _df_adj_orig = pd.DataFrame(
+                {
+                    "edge_orig": np.column_stack([start_slots, end_slots]).tolist(),
+                    "start": start_slots,
+                    "end": end_slots,
+                    "weight": junction_weight,
+                }
+            )
+            status_labels = np.where(
+                final_status == 2,
+                "A",
+                "",
+            )
+            _df_adj_sum = pd.DataFrame(
+                {
+                    "edge_mod": [
+                        "[" + str(start_value) + ", " + str(end_value) + "]"
+                        for start_value, end_value in zip(final_start, final_end)
+                    ],
+                    "start": final_start,
+                    "end": final_end,
+                    "weight": final_weight,
+                    "_status": status_labels,
+                }
+            )
 
         # check adj matrix
-        if ((self.ck.upper() == "Y") | (self.show.upper() == "Y")):
+        if need_debug:
             print('Original edge table:')
             display(_df_adj_orig)
             print('Modified edge table:')
@@ -256,14 +570,20 @@ class gene(object):
 
         #initialize an adjacent matrix 
         am = np.zeros(shape=(n_node,n_node))
-
-        #update adjacency using edge dataframe weight
-        for i in range(0,len(am)):
-            for j in range(0,len(am)):
-                for k in range(_df_adj_sum.shape[0]):
-                    if (_df_adj_sum['start'][k] == i) & (_df_adj_sum['end'][k] == j):
-                        am[i][j] = _df_adj_sum["weight"][k]
-                        break
+        if final_start.size:
+            finite_edge_mask = np.isfinite(final_start) & np.isfinite(final_end)
+            start_idx = final_start[finite_edge_mask].astype(int, copy=False)
+            end_idx = final_end[finite_edge_mask].astype(int, copy=False)
+            final_weight = final_weight[finite_edge_mask]
+            valid_edge_mask = (
+                (start_idx >= 0)
+                & (end_idx >= 0)
+                & (start_idx < n_node)
+                & (end_idx < n_node)
+            )
+            am[start_idx[valid_edge_mask], end_idx[valid_edge_mask]] = (
+                final_weight[valid_edge_mask]
+            )
         
         self.adj_mat = am.flatten()
                     
@@ -275,6 +595,9 @@ class gene(object):
     """
     #initialize direct graph
     def adj_show(self):
+        from matplotlib import pyplot as plt
+        import networkx as nx
+
         #initialize direct graph
         G = nx.DiGraph()
 
@@ -311,20 +634,23 @@ class gene(object):
             for i in range(0,len(self.gene_list)):
             # for i in tqdm(range(len(self.gene_list)), desc=f"[{self.srr}] Processing genes", leave=False):
                 self.id = self.gene_list[i]
-                print("Sample = ",self.srr, ", Gene id = ",self.id, "is running.")
+                if self.verbose:
+                    print("Sample = ",self.srr, ", Gene id = ",self.id, "is running.")
                 self.exon_read()
                 self.jun_read()
                 self.count_fea()
                 #combine all feature matrix of genes per cell 
-                temp_indx = self.gtf[(self.gtf['Geneid'] == self.id)].index.to_list()
-                for ind in range(0,len(temp_indx)):
-                    vec_f[temp_indx[ind]] = self.feat_mat[ind]
+                temp_indx = self.gene_index_map.get(self.id)
+                if temp_indx is None:
+                    temp_indx = self.gtf[(self.gtf['Geneid'] == self.id)].index.to_list()
+                vec_f[np.asarray(temp_indx, dtype=int)] = self.feat_mat[:, 0]
                 
                 self.count_adj()
                 #combine all adjacency matrix of genes per cell 
-                start_indx = int(self.adj_ind[(self.adj_ind["geneid"] == self.id)]['ind_st'].values[0])
-                for i in range(0,len(self.adj_mat)):
-                    vec_a[i+start_indx] = self.adj_mat[i]
+                start_indx = self.adj_start_by_gene.get(self.id)
+                if start_indx is None:
+                    start_indx = int(self.adj_ind[(self.adj_ind["geneid"] == self.id)]['ind_st'].values[0])
+                vec_a[int(start_indx):int(start_indx) + len(self.adj_mat)] = self.adj_mat
 
             #save the final data to csv file
             np.savetxt(os.path.join(self.main_path, "06_graph_mtx", self.srr+ "_fea.csv"), vec_f, fmt='%10.4f', delimiter = ',')
@@ -333,7 +659,8 @@ class gene(object):
             return(vec_f,vec_a)
         else:
             #if only running one gene per sample, no need to produce tensor output, matrix is enough for debug
-            print("Sample = ",self.srr, ", Gene id = ",self.id, "is running.")
+            if self.verbose:
+                print("Sample = ",self.srr, ", Gene id = ",self.id, "is running.")
             self.exon_read()
             self.jun_read()
             self.count_fea()
@@ -343,3 +670,72 @@ class gene(object):
                 self.adj_show()
             print(self.feat_mat)
             print("Done")
+
+    def get_all_sparse(self):
+        if self.id != "":
+            raise ValueError("get_all_sparse only supports whole-cell processing.")
+
+        self.get_gene()
+        feature_indices = []
+        feature_values = []
+        adjacency_indices = []
+        adjacency_values = []
+        feature_size = len(self.gtf)
+        adjacency_size = int(self.adj_ind["ind"].sum())
+
+        for gene_id in self.gene_list:
+            self.id = gene_id
+            if self.verbose:
+                print("Sample = ", self.srr, ", Gene id = ", self.id, "is running.")
+
+            self.exon_read()
+            self.jun_read()
+            self.count_fea()
+
+            temp_indx = self.gene_index_map.get(self.id)
+            if temp_indx is None:
+                temp_indx = self.gtf[(self.gtf["Geneid"] == self.id)].index.to_list()
+            temp_indx = np.asarray(temp_indx, dtype=np.int64)
+            feat_vals = self.feat_mat[:, 0].astype(np.float32, copy=False)
+            feat_nonzero = np.flatnonzero(feat_vals)
+            if feat_nonzero.size:
+                feature_indices.append(temp_indx[feat_nonzero].astype(np.int32, copy=False))
+                feature_values.append(feat_vals[feat_nonzero])
+
+            self.count_adj()
+            start_indx = self.adj_start_by_gene.get(self.id)
+            if start_indx is None:
+                start_indx = int(
+                    self.adj_ind[(self.adj_ind["geneid"] == self.id)]["ind_st"].values[0]
+                )
+            adj_vals = self.adj_mat.astype(np.float32, copy=False)
+            adj_nonzero = np.flatnonzero(adj_vals)
+            if adj_nonzero.size:
+                adjacency_indices.append(
+                    (adj_nonzero + int(start_indx)).astype(np.int32, copy=False)
+                )
+                adjacency_values.append(adj_vals[adj_nonzero])
+
+        if feature_indices:
+            feature_indices = np.concatenate(feature_indices)
+            feature_values = np.concatenate(feature_values)
+        else:
+            feature_indices = np.empty(0, dtype=np.int32)
+            feature_values = np.empty(0, dtype=np.float32)
+
+        if adjacency_indices:
+            adjacency_indices = np.concatenate(adjacency_indices)
+            adjacency_values = np.concatenate(adjacency_values)
+        else:
+            adjacency_indices = np.empty(0, dtype=np.int32)
+            adjacency_values = np.empty(0, dtype=np.float32)
+
+        return {
+            "sample_id": self.srr,
+            "feature_size": int(feature_size),
+            "feature_indices": feature_indices,
+            "feature_values": feature_values,
+            "adjacency_size": int(adjacency_size),
+            "adjacency_indices": adjacency_indices,
+            "adjacency_values": adjacency_values,
+        }

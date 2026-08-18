@@ -2,6 +2,129 @@
 
 DOLPHIN: Deep Exon-level Graph Neural Network for Single-cell Representation Learning and Alternative Splicing
 
+## DOLPHIN v2: Clean Pipeline and Codex Skill
+
+> [!IMPORTANT]
+> DOLPHIN v2 is being prepared on the `v2-clean-pipeline` branch. The original DOLPHIN release, files, tutorials, and ReadTheDocs site remain available and are not overwritten. Codex is an optional guided interface; the DOLPHIN scientific pipeline can still be run directly from the command line.
+
+### Versions and preserved releases
+
+| Version | Branch or tag | Status | Purpose |
+| --- | --- | --- | --- |
+| DOLPHIN v2 | [`v2-clean-pipeline`](https://github.com/mcgilldinglab/DOLPHIN/tree/v2-clean-pipeline) | v2 release candidate | Finalized efficient pipeline plus the optional Codex skill |
+| Original DOLPHIN | [`main`](https://github.com/mcgilldinglab/DOLPHIN/tree/main) | Current original release | Original code, README, tutorials, and ReadTheDocs workflow |
+| DOLPHIN v1 snapshot | [`legacy-v1`](https://github.com/mcgilldinglab/DOLPHIN/tree/legacy-v1) / `v1.0.0-legacy` | Preserved | Permanent snapshot of the original repository before v2 |
+| Zebrafish gene-ID fix | [`fix-zebrafish-gene-id-order`](https://github.com/mcgilldinglab/DOLPHIN/tree/fix-zebrafish-gene-id-order) | Targeted bug fix | Supports gene identifiers that do not end in a numeric order |
+
+The original README continues below this v2 section without replacing its existing content. Historical releases remain reproducible through their branch or tag even as v2 evolves independently.
+
+### What v2 provides
+
+DOLPHIN v2 organizes the validated workflow into four connected sections:
+
+- **Preprocessing and graph generation:** reference preparation, full-length and 10x raw-read preprocessing, pooled exon/junction matrices, and lightweight graph-store model input.
+- **Model and embedding:** DOLPHIN training from the graph store and export of the final embedding to `DOLPHIN_Z.h5ad`.
+- **Alternative splicing:** both BAM-level and direct-junction aggregation for full-length and 10x data, followed by the unchanged Outrigger event/index/PSI workflow.
+- **EDEG and JDEG:** the historical one-cluster-vs-rest MAST workflow, followed by exon-to-gene or junction-to-gene evidence aggregation.
+
+Full-length and 10x data follow the same high-level scientific workflow. Modality-specific code only adapts their input formats. Smoke tests and complete runs use the same implementation, with cell subsetting used only to reduce test size.
+
+### Choose how to run v2
+
+#### Option A: Guided execution with the Codex skill
+
+Use this option when you want Codex to inspect inputs, ask about scientifically meaningful choices, prepare commands, monitor runs, expose errors, and verify retained outputs.
+
+1. Clone the v2 branch and enter the repository:
+
+   ```bash
+   git clone --branch v2-clean-pipeline https://github.com/mcgilldinglab/DOLPHIN.git
+   cd DOLPHIN
+   ```
+
+2. Install the Codex CLI on Linux or macOS:
+
+   ```bash
+   curl -fsSL https://chatgpt.com/codex/install.sh | sh
+   ```
+
+   See the [official Codex CLI documentation](https://developers.openai.com/codex/cli) for authentication and alternative installation methods.
+
+3. Start Codex from the DOLPHIN repository:
+
+   ```bash
+   codex
+   ```
+
+   The repository-scoped skill is stored at `.agents/skills/dolphin-pipeline/` and is discovered automatically. Use `/skills` to inspect available skills or mention `$dolphin-pipeline` explicitly. See the [official skills documentation](https://developers.openai.com/codex/skills).
+
+4. Start with a planning prompt that identifies the modality, input paths, output root, and available compute. For example:
+
+   ```text
+   Use $dolphin-pipeline to inspect my full-length scRNA-seq inputs, validate the
+   reference files, and prepare an end-to-end run from raw reads to DOLPHIN_Z.h5ad.
+   Show the plan and expected outputs before starting any expensive step.
+   ```
+
+   ```text
+   Use $dolphin-pipeline to run the same validated pipeline for my 10x dataset.
+   Keep durable outputs under my project directory, choose scratch storage robustly,
+   and do not overwrite existing results.
+   ```
+
+5. For downstream workflows, state the required route explicitly when it affects scientific meaning:
+
+   ```text
+   Use $dolphin-pipeline to run alternative splicing for 10x data with both the BAM
+   aggregation and direct-junction aggregation routes, then compare their outputs.
+   ```
+
+   ```text
+   Use $dolphin-pipeline to run the historical one-cluster-vs-rest MAST EDEG and JDEG
+   workflows from the finalized DOLPHIN outputs.
+   ```
+
+Codex should confirm the full-length versus 10x modality, the alternative-splicing route, durable and scratch locations, resource-intensive runs, and any operation that could overwrite results. It must not change Outrigger semantics or the historical EDEG/JDEG statistical design without explicit approval.
+
+#### Option B: Direct command-line execution
+
+Codex is not required. Create the DOLPHIN environment, install the package, and use the finalized Python entry points directly:
+
+```bash
+conda env create -f environment.yaml
+conda activate DOLPHIN
+pip install -e .
+```
+
+The v2 workflow documentation is organized by task:
+
+- [Preprocessing and graph generation](docs/preprocessing/README.md)
+- [Model training and embedding](docs/model/README.md)
+- [Alternative splicing](docs/alternative_splicing/README.md)
+- [EDEG and JDEG](docs/edeg/README.md)
+- [Retained pipeline outputs](docs/PIPELINE_OUTPUTS.md)
+- [Mapping from original functions to v2](docs/ORIGINAL_FUNCTION_COVERAGE.md)
+
+External tools such as STAR, featureCounts/Subread, samtools, bedtools, R/Seurat/MAST, and Outrigger are required only by the corresponding stages. Validate each stage's environment before launching a full dataset.
+
+### Main retained outputs
+
+| Stage | Main retained outputs | Purpose |
+| --- | --- | --- |
+| Reference preparation | `reference_manifest.json`, exon GTF/index files, optional `star_index/` | Shared exon and junction reference bundle |
+| Raw preprocessing | `cell_manifest.tsv` and grouped gene/exon/junction count tables | Stable full-length or 10x handoff |
+| Graph generation | pooled feature and adjacency H5AD files | Exon-level graph matrices without retained per-cell graph fragments |
+| Model input | `model_<out_name>.graph.json`, `model_<out_name>.edges.h5` | Lightweight lazy graph store |
+| Model training | `DOLPHIN_Z.h5ad` | Final cell embedding |
+| Alternative splicing | `PSI.h5ad`, `PSI_random.h5ad`, `PSI_DAS.h5ad` | PSI matrices and differential AS results |
+| EDEG/JDEG | per-cluster MAST tables and gene-level summaries | Historical one-vs-rest differential analysis |
+
+Temporary files may be placed on fast local scratch storage when available, but durable outputs remain under a user-selected project directory. The pipeline does not require a specific server path such as `/tmp` or `/mnt/md0`.
+
+---
+
+## Original DOLPHIN README
+
 Full documentation and tutorials are available at [DOLPHIN Docs](https://dolphin-sc.readthedocs.io/en/latest/).
 
 <img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">

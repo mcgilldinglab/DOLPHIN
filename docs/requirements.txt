@@ -6,3 +6,5 @@ sphinx-autodoc-typehints
 recommonmark
 nbsphinx
 myst-parser
+anndata==0.11.1
+ipython

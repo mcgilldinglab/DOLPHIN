@@ -1,8 +1,6 @@
-from .func_step03_GNN_main import get_graph_input
-import torch
+import json
+from .func_step03_GNN_main import _build_graph_context, write_graph_store
 from tqdm import tqdm
-import math
-import anndata
 import os
 import pandas as pd
 
@@ -33,17 +31,12 @@ def run_model_input(
     Returns
     -------
     None
-        Saves the final torch tensor file as `model_<out_name>.pt` in the output directory.
+        Saves a graph-store manifest as `model_<out_name>.graph.json` in the output directory.
 
-        This file contains a list of PyTorch Geometric `Data` objects, one per cell. Each object includes:
-
-        - x : Feature matrix of the cell (normalized exon counts, shaped `[num_features, 1]`)
-        - edge_index : Graph connectivity (exon-exon connection indices)
-        - edge_attr : Edge weights for the exon graph
-        - y : Label for the cell (optional; set to numerical index if `celltypename` is not provided)
-        - x_fea : Original feature vector for the cell
-        - x_adj : Raw adjacency matrix for the cell
-        - sample_name : The ID of the cell
+        The graph store keeps the canonical pooled h5ad matrices on disk and stores
+        only edge_index / edge_attr / labels in a compact edge store. During model
+        training, a lazy loader reconstructs the same PyTorch Geometric `Data`
+        objects that the legacy `.pt` path produced.
 
     """
     
@@ -57,28 +50,32 @@ def run_model_input(
     
     final_out_dir = os.path.join(out_directory, "data")
     os.makedirs(final_out_dir, exist_ok=True)
-    temp_out_dir = os.path.join(final_out_dir, "temp")
-    os.makedirs(temp_out_dir, exist_ok=True)
         
     print("Start Construct Data Input for model input")
+    graph_context = _build_graph_context(
+        final_out_dir,
+        out_name,
+        celltypename=celltypename,
+        mapper=mapper,
+    )
+    total_sample_size = len(graph_context["sample_list"])
+    edge_store_path = os.path.join(final_out_dir, "model_" + out_name + ".edges.h5")
     with tqdm(total=total_sample_size) as pbar_gnn:
-        for i in range(0, total_sample_size):
-            if i%gnn_run_num==0:
-                pbar_gnn= get_graph_input(pbar_gnn, 
-                                          i, 
-                                          gnn_run_num, 
-                                          temp_out_dir, 
-                                          final_out_dir,
-                                          out_name, 
-                                          celltypename=celltypename, 
-                                          mapper=mapper)
+        graph_store_summary = write_graph_store(edge_store_path, graph_context, pbar=pbar_gnn)
 
-    ##### combine all  geometric .pt files
-    total_number_gnn_anndata = math.ceil(total_sample_size/gnn_run_num)
-    for _idx, _gnn_idx in enumerate(range(0, total_number_gnn_anndata)):
-        _temp_gnn = torch.load(os.path.join(temp_out_dir, "model_"+out_name+"_"+str(_gnn_idx)+".pt"))
-        if _idx ==0:
-            combine_gnn = _temp_gnn
-        else:
-            combine_gnn += _temp_gnn
-    torch.save(combine_gnn, os.path.join(final_out_dir, "model_"+out_name+".pt"))
+    manifest = {
+        "format": "dolphin_graph_store_v1",
+        "out_name": out_name,
+        "n_cells": int(total_sample_size),
+        "n_edges": int(graph_store_summary["n_edges"]),
+        "feature_h5ad": graph_context["feature_h5ad_path"],
+        "adjacency_raw_h5ad": graph_context["adj_raw_h5ad_path"],
+        "adjacency_edge_h5ad": graph_context["adj_edge_h5ad_path"],
+        "edge_store_h5": edge_store_path,
+        "celltypename": celltypename,
+        "gnn_run_num_legacy": int(gnn_run_num),
+    }
+    manifest_path = os.path.join(final_out_dir, "model_" + out_name + ".graph.json")
+    with open(manifest_path, "w", encoding="utf-8") as handle:
+        json.dump(manifest, handle, indent=2)
+    print(f"Saved graph-store manifest to {manifest_path}")

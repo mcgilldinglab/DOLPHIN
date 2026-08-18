@@ -6,7 +6,8 @@ import anndata
 from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
 from functools import partial
-from .func_step02_adj_mat_main_part1_main_1 import combine_adj
+from .func_step02_adj_mat_main_part1_main_1 import combine_adj, build_adjacency_var_annotation
+from ._anndata_compat import enable_nullable_string_writes
 
 def _combine_adj_wrapper(args):
     return combine_adj(*args)
@@ -56,6 +57,7 @@ def run_adjacency_combination(
     os.makedirs(final_out_dir, exist_ok=True)
     temp_out_dir = os.path.join(final_out_dir, "temp")
     os.makedirs(temp_out_dir, exist_ok=True)
+    adj_var = build_adjacency_var_annotation(adj_meta_file)
 
     # 1. Prepare all batch arguments
     args_list = []
@@ -67,7 +69,8 @@ def run_adjacency_combination(
             i,
             adj_run_num,
             temp_out_dir,
-            out_name
+            out_name,
+            adj_var,
         ))
 
     # 2. Run combine_adj for each batch
@@ -92,6 +95,7 @@ def run_adjacency_combination(
     combined_adata = adata_list[0]
     for ad in adata_list[1:]:
         combined_adata = combined_adata.concatenate(ad, index_unique=None, batch_key=None)
+    enable_nullable_string_writes()
     combined_adata.write(os.path.join(final_out_dir, f"Adjacency_{out_name}.h5ad"))
 
     if clean_temp:

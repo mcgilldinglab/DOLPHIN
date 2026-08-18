@@ -5,6 +5,11 @@ import scanpy as sc
 import matplotlib.pyplot as plt
 import os
 
+from ..graph_generation._anndata_compat import (
+    enable_nullable_string_writes,
+    write_h5ad_preserve_strings,
+)
+
 """
 Define dataset and latent space plot
 """
@@ -29,5 +34,6 @@ def z_leiden_cluster(out_path, model, adata, data_loader, epoch, device):
     ### step2: create annadata for latent space
     adata.obsm["X_z"] = mu_latent_all
     #save the latent representation results
-    adata.write(os.path.join(out_path,"DOLPHIN_Z.h5ad"))
+    enable_nullable_string_writes()
+    write_h5ad_preserve_strings(adata, os.path.join(out_path, "DOLPHIN_Z.h5ad"))
     

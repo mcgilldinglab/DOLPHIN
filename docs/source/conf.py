@@ -29,6 +29,22 @@ extensions = [
     # 'myst_nb'
 ]
 
+# API pages only need signatures and docstrings; importing the full scientific
+# stack would make documentation builds require the model runtime and GPU stack.
+autodoc_mock_imports = [
+    'intervaltree',
+    'matplotlib',
+    'pybedtools',
+    'pyro',
+    'pysam',
+    'scanpy',
+    'sklearn',
+    'statsmodels',
+    'torch',
+    'torch_geometric',
+    'tqdm',
+]
+
 nbsphinx_execute = 'never'
 highlight_language = "python"
 pygments_style = "friendly"
@@ -38,6 +54,7 @@ intersphinx_mapping = {
     'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
 }
 intersphinx_disabled_domains = ['std']
+suppress_warnings = ['misc.highlighting_failure']
 
 templates_path = ['_templates']
 
