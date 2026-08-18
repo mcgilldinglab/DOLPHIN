@@ -25,9 +25,10 @@ def run_convert_psi(
     metadata_path : str
         Path to the metadata file. Must be a tab-separated file containing a column named 'CB' for cell barcodes.
     outrigger_path : str
-        Path to the directory containing Outrigger results. This directory must include:
-            - "psi/outrigger_summary.csv": PSI values per cell and event.
-            - "index/se/validated/events.csv" and "index/mxe/validated/events.csv": Event-to-gene mapping.
+        Path to the directory containing Outrigger results. The directory must
+        contain ``psi/outrigger_summary.csv`` for PSI values and the validated
+        ``events.csv`` files under ``index/se`` and ``index/mxe`` for event-to-gene
+        mapping.
     out_name : str
         Output filename prefix (without extension). Final output will be named "<out_name>_PSI.h5ad".
     out_directory : str, optional
@@ -35,15 +36,11 @@ def run_convert_psi(
 
     Returns
     -------
-    adata : anndata.AnnData
-        A structured AnnData object with the following components:
-        - X : np.ndarray
-            The PSI matrix (cells by events), with PSI values for each splicing event.
-        - obs : pandas.DataFrame
-            Cell-level metadata, with cell barcodes and additional columns from the input metadata file.
-        - var : pandas.DataFrame
-            Event-level metadata with gene names
-        The output adata will be saved as: `<out_directory>/alternative_splicing/<out_name>_PSI.h5ad`.
+    anndata.AnnData
+        Structured AnnData object containing the cell-by-event PSI matrix,
+        cell-level metadata in ``obs``, and event-level gene annotations in
+        ``var``. The object is also saved under
+        ``<out_directory>/alternative_splicing/<out_name>_PSI.h5ad``.
 
     """
     final_out_dir = os.path.join(out_directory, "alternative_splicing")
