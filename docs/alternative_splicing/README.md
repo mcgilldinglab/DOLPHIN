@@ -4,7 +4,7 @@ This document describes the finalized DOLPHIN alternative splicing code organiza
 
 ## Package Location
 
-- [DOLPHIN/alternative_splicing](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/alternative_splicing)
+- [DOLPHIN/alternative_splicing](../../DOLPHIN/alternative_splicing)
 
 ## Finalized Routes
 

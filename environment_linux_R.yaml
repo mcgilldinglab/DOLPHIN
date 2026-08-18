@@ -1,0 +1,19 @@
+name: DOLPHIN_R
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Python core
+  - python=3.10.15
+  - scanpy==1.10.4
+
+  # R core
+  - r-base=4.2
+  - r-reticulate
+  - r-seurat=4.1.1
+  - icu=58
+
+  # Optional but helpful for compatibility
+  - r-patchwork
+  - r-dplyr

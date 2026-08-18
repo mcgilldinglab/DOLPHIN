@@ -4,18 +4,18 @@ This folder covers the finalized DOLPHIN model path.
 
 ## Code Root
 
-- [`DOLPHIN/model`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/model)
+- [`DOLPHIN/model`](../../DOLPHIN/model)
 
 ## Final Entry Points
 
 - main API:
-  - [`DOLPHIN/model/run_model.py`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/model/run_model.py)
+  - [`DOLPHIN/model/run_model.py`](../../DOLPHIN/model/run_model.py)
 - training loop:
-  - [`DOLPHIN/model/train.py`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/model/train.py)
+  - [`DOLPHIN/model/train.py`](../../DOLPHIN/model/train.py)
 - graph-store loader:
-  - [`DOLPHIN/model/lazy_graph_store.py`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/model/lazy_graph_store.py)
+  - [`DOLPHIN/model/lazy_graph_store.py`](../../DOLPHIN/model/lazy_graph_store.py)
 - model definition:
-  - [`DOLPHIN/model/model.py`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/model/model.py)
+  - [`DOLPHIN/model/model.py`](../../DOLPHIN/model/model.py)
 
 ## Final Design Decisions
 
@@ -36,4 +36,4 @@ This folder covers the finalized DOLPHIN model path.
 
 ## Output Contract
 
-See [docs/PIPELINE_OUTPUTS.md](/mnt/md0/kailu/DOLPHIN_codex/github_ready/docs/PIPELINE_OUTPUTS.md).
+See [the pipeline output contract](../PIPELINE_OUTPUTS.md).

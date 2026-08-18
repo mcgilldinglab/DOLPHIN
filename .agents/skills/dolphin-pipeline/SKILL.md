@@ -7,7 +7,7 @@ description: "Use for DOLPHIN repository work involving the finalized GitHub-rea
 
 ## Core Rule
 
-Treat `github_ready` as the source of truth for the finalized engineered DOLPHIN package. If this skill is inside the repository, resolve the package root as two directories above this skill folder unless the user provides another root.
+Treat the Git repository containing `.agents/skills/dolphin-pipeline` as the source of truth for the finalized engineered DOLPHIN package. When the skill is repository-scoped, resolve the package root as three directories above this skill folder. When it is installed at user scope, locate the active DOLPHIN repository from the current working directory unless the user provides another root.
 
 Do not resurrect legacy code paths from `DOLPHIN_original_clone`, `DOLPHIN_optimized`, `AS_run`, smoke-test folders, or execution-run folders unless the user explicitly asks for historical comparison or debugging.
 

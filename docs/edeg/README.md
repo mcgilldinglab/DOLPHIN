@@ -45,7 +45,7 @@ JDEG historical input:
 
 ## Package Location
 
-- [DOLPHIN/EDEG](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/EDEG)
+- [DOLPHIN/EDEG](../../DOLPHIN/EDEG)
 
 ## Important Note
 

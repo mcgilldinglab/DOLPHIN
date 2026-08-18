@@ -9,17 +9,17 @@ This folder covers the finalized preprocessing path:
 
 ## Code Roots
 
-- [`DOLPHIN/preprocess`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/preprocess)
-- [`DOLPHIN/graph_generation`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/graph_generation)
+- [`DOLPHIN/preprocess`](../../DOLPHIN/preprocess)
+- [`DOLPHIN/graph_generation`](../../DOLPHIN/graph_generation)
 
 ## Final Entry Points
 
 - reference / preprocessing CLI:
-  - [`DOLPHIN/preprocess/cli.py`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/preprocess/cli.py)
+  - [`DOLPHIN/preprocess/cli.py`](../../DOLPHIN/preprocess/cli.py)
 - preprocessing plan / execution:
-  - [`DOLPHIN/preprocess/pipeline.py`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/preprocess/pipeline.py)
+  - [`DOLPHIN/preprocess/pipeline.py`](../../DOLPHIN/preprocess/pipeline.py)
 - graph generation:
-  - [`DOLPHIN/graph_generation/preprocess_raw_reads.py`](/mnt/md0/kailu/DOLPHIN_codex/github_ready/DOLPHIN/graph_generation/preprocess_raw_reads.py)
+  - [`DOLPHIN/graph_generation/preprocess_raw_reads.py`](../../DOLPHIN/graph_generation/preprocess_raw_reads.py)
 
 ## Final Design Decisions
 
@@ -31,4 +31,4 @@ This folder covers the finalized preprocessing path:
 
 ## Output Contract
 
-See [docs/PIPELINE_OUTPUTS.md](/mnt/md0/kailu/DOLPHIN_codex/github_ready/docs/PIPELINE_OUTPUTS.md).
+See [the pipeline output contract](../PIPELINE_OUTPUTS.md).
