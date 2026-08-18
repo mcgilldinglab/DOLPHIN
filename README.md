@@ -5,18 +5,18 @@ DOLPHIN: Deep Exon-level Graph Neural Network for Single-cell Representation Lea
 ## DOLPHIN v2: Clean Pipeline and Codex Skill
 
 > [!IMPORTANT]
-> DOLPHIN v2 is being prepared on the `v2-clean-pipeline` branch. The original DOLPHIN release, files, tutorials, and ReadTheDocs site remain available and are not overwritten. Codex is an optional guided interface; the DOLPHIN scientific pipeline can still be run directly from the command line.
+> DOLPHIN v2 is the current release on `main`. The original DOLPHIN release, files, tutorials, and ReadTheDocs site remain available through `legacy-v1` and `v1.0.0-legacy`. Codex is an optional guided interface; the DOLPHIN scientific pipeline can still be run directly from the command line.
 
 ### Versions and preserved releases
 
 | Version | Branch or tag | Status | Purpose |
 | --- | --- | --- | --- |
-| DOLPHIN v2 | [`v2-clean-pipeline`](https://github.com/mcgilldinglab/DOLPHIN/tree/v2-clean-pipeline) | v2 release candidate | Finalized efficient pipeline plus the optional Codex skill |
-| Original DOLPHIN | [`main`](https://github.com/mcgilldinglab/DOLPHIN/tree/main) | Current original release | Original code, README, tutorials, and ReadTheDocs workflow |
-| DOLPHIN v1 snapshot | [`legacy-v1`](https://github.com/mcgilldinglab/DOLPHIN/tree/legacy-v1) / `v1.0.0-legacy` | Preserved | Permanent snapshot of the original repository before v2 |
-| Zebrafish gene-ID fix | [`fix-zebrafish-gene-id-order`](https://github.com/mcgilldinglab/DOLPHIN/tree/fix-zebrafish-gene-id-order) | Targeted bug fix | Supports gene identifiers that do not end in a numeric order |
+| DOLPHIN v2 | [`main`](https://github.com/mcgilldinglab/DOLPHIN/tree/main) | Current release | Finalized efficient pipeline plus the optional Codex skill |
+| DOLPHIN v2 release branch | [`v2-clean-pipeline`](https://github.com/mcgilldinglab/DOLPHIN/tree/v2-clean-pipeline) | Preserved | Source branch retained for the v2 release history |
+| Original DOLPHIN v1 | [`legacy-v1`](https://github.com/mcgilldinglab/DOLPHIN/tree/legacy-v1) / `v1.0.0-legacy` | Preserved | Permanent snapshot of the original repository before v2 |
+| Zebrafish v1 fix | [`fix-zebrafish-gene-id-order`](https://github.com/mcgilldinglab/DOLPHIN/tree/fix-zebrafish-gene-id-order) | Preserved compatibility branch | Adds non-numeric gene-ID support to v1; the fix is also included in v2 |
 
-The original README continues below this v2 section without replacing its existing content. Historical releases remain reproducible through their branch or tag even as v2 evolves independently.
+The original README continues below this v2 section without replacing its existing content. Historical releases remain reproducible through their preserved branch or tag.
 
 ### What v2 provides
 
@@ -35,10 +35,10 @@ Full-length and 10x data follow the same high-level scientific workflow. Modalit
 
 Use this option when you want Codex to inspect inputs, ask about scientifically meaningful choices, prepare commands, monitor runs, expose errors, and verify retained outputs.
 
-1. Clone the v2 branch and enter the repository:
+1. Clone the current v2 release and enter the repository:
 
    ```bash
-   git clone --branch v2-clean-pipeline https://github.com/mcgilldinglab/DOLPHIN.git
+   git clone https://github.com/mcgilldinglab/DOLPHIN.git
    cd DOLPHIN
    ```
 
