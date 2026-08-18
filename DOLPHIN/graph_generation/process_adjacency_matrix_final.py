@@ -5,6 +5,8 @@ import os
 from tqdm import tqdm
 from scipy.sparse import csr_matrix
 
+from DOLPHIN._gene_order import map_gene_orders
+
 def run_adjacency_matrix_final(
     out_name: str,
     out_directory: str = "./",
@@ -41,11 +43,15 @@ def run_adjacency_matrix_final(
 
     adata_fea_gtf = anndata.read_h5ad(os.path.join(final_out_dir, f"Feature_{out_name}.h5ad"))
     sample_list = list(adata_fea_gtf.obs_names)
+    reference_gene_ids = adata_fea_gtf.var["gene_id"].tolist()
 
     # === Step 2: Identify expressed exons
     df_fea_orig_var = pd.DataFrame(adata_fea_gtf.var)
     df_fea_gtf = pd.merge(adata_fea_gtf.to_df().T, df_fea_orig_var, how="left",left_index=True, right_index=True)
-    df_fea_gtf["gene_order"] = df_fea_gtf["gene_id"].apply(lambda x: int(x[4:]))
+    df_fea_gtf["gene_order"] = map_gene_orders(
+        df_fea_gtf["gene_id"],
+        reference_gene_ids,
+    )
     df_fea_gtf["gtf_index"] = df_fea_gtf.index
     df_fea_gtf["exon_order"] = df_fea_gtf["gtf_index"].apply(lambda x: int(x.split("-")[-1]))
     df_fea_gtf_order = df_fea_gtf.sort_values(by=["gene_order", "exon_order"])
@@ -75,7 +81,6 @@ def run_adjacency_matrix_final(
     df_adj["gene_name"] = df_adj["_idx"].apply(lambda x: x[:x.rfind("-")])
     df_adj["gene_id"] = df_adj["gene_name"].map(gene_name_to_id)
     df_adj["adj_vec_size"] = df_adj.groupby("gene_id")["gene_id"].transform("count")
-    df_adj["gene_order"] = df_adj["gene_id"].apply(lambda x: int(x[4:]))
     df_adj["exon_order"] = df_adj["_idx"].apply(lambda x: int(x.split("-")[-1]))
     df_adj["exon_name"] = df_adj["gene_id"].astype(str) + "-" + df_adj["exon_order"].astype(str)
 
@@ -135,7 +140,7 @@ def run_adjacency_matrix_final(
     var["gene_name"] = df_filtered["gene_name"].values
 
     # # ##the data matrix 
-    X = df_filtered.drop(columns=["gene_id", "gene_name","_ck_empty","_idx","adj_vec_size","_flag", "gene_order", "exon_order","exon_name","new_index","var_new_index"]).T.iloc[:,:].values
+    X = df_filtered.drop(columns=["gene_id", "gene_name","_ck_empty","_idx","adj_vec_size","_flag", "exon_order","exon_name","new_index","var_new_index"]).T.iloc[:,:].values
     adata = anndata.AnnData(X=X, obs=obs, var=var)
     adata.X = csr_matrix(adata.X)
     

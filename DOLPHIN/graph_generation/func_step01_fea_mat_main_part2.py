@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
 
+from DOLPHIN._gene_order import map_gene_orders
+
 ##################################################################################################################
 ## Convert Full Feature Matrix to Compact Feature Matrix
 ## Only the exon whose expression level is zero across all the samples needs to be removed.
@@ -12,6 +14,7 @@ from scipy.sparse import csr_matrix
 def fea_comp(output_path, output_name):
     #check the exon is zero across all the samples
     adata_fea_orig = anndata.read_h5ad(os.path.join(output_path, "Feature_"+output_name+".h5ad"))
+    reference_gene_ids = adata_fea_orig.var["gene_id"].tolist()
 
     #### remove exon is empty across all the cells
     sc.pp.filter_genes(adata_fea_orig, min_cells=1)
@@ -25,7 +28,10 @@ def fea_comp(output_path, output_name):
     df_fea_comp_add_var = pd.merge(df_fea_comp.T, df_fea_orig_var, how="left",left_index=True, right_index=True)
     df_fea_comp_add_var = df_fea_comp_add_var.reset_index()
     df_fea_comp_add_var["orig_idx_order"] = df_fea_comp_add_var["index"].apply(lambda x: int(x.split('-')[-1]))
-    df_fea_comp_add_var["gene_order"] = df_fea_comp_add_var["gene_id"].apply(lambda x: int(x[4:]))
+    df_fea_comp_add_var["gene_order"] = map_gene_orders(
+        df_fea_comp_add_var["gene_id"],
+        reference_gene_ids,
+    )
     df_fea_comp_reorder = df_fea_comp_add_var.sort_values(by=["gene_order", "orig_idx_order"])
     df_fea_comp_reorder["new_index"] = df_fea_comp_reorder.groupby(["gene_id"]).cumcount()+1
     df_fea_comp_reorder["var_new_index"] = df_fea_comp_reorder['gene_id'].astype(str) +"-"+ df_fea_comp_reorder["new_index"].astype(str)
