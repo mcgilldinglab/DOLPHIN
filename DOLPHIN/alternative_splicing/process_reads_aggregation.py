@@ -24,7 +24,14 @@ def _resolve_source_file(root: str, sample: str, extension: str) -> Path:
 
 
 def _run_shell(command: str):
-    subprocess.run(command, shell=True, executable="/bin/sh", check=True)
+    configured = os.environ.get("DOLPHIN_AS_SHELL")
+    shell_executable = shutil.which(configured) if configured else None
+    shell_executable = shell_executable or shutil.which("sh")
+    if shell_executable is None:
+        raise RuntimeError(
+            "No shell executable found. Set DOLPHIN_AS_SHELL or add sh to PATH."
+        )
+    subprocess.run(command, shell=True, executable=shell_executable, check=True)
 
 
 def _load_sample_junctions(sample, junction_file_path, junction_file_extension, junction_cache):

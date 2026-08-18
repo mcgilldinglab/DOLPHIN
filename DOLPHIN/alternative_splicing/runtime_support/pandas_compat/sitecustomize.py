@@ -32,12 +32,11 @@ if hasattr(pd, "Series") and hasattr(pd.Series, "groupby"):
     pd.Series.groupby = _patched_ser_groupby
 
 
-DEFAULT_BEDTOOLS_BIN = Path("/mnt/md0/kailu/DOLPHIN_codex/runtime_envs/dolphin_preprocess_env/bin")
 BEDTOOLS_BIN = os.environ.get("DOLPHIN_AS_BEDTOOLS_BIN")
-if not BEDTOOLS_BIN and DEFAULT_BEDTOOLS_BIN.is_dir():
-    BEDTOOLS_BIN = str(DEFAULT_BEDTOOLS_BIN)
+if BEDTOOLS_BIN:
+    BEDTOOLS_BIN = str(Path(BEDTOOLS_BIN).expanduser())
 
-if BEDTOOLS_BIN and os.path.isdir(BEDTOOLS_BIN):
+if BEDTOOLS_BIN and Path(BEDTOOLS_BIN).is_dir():
     os.environ["PATH"] = BEDTOOLS_BIN + os.pathsep + os.environ.get("PATH", "")
     try:
         from pybedtools import helpers as _pybedtools_helpers

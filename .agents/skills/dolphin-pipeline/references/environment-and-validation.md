@@ -51,6 +51,24 @@ Robust behavior:
 
 Before long runs, check free space for both scratch and final output roots.
 
+### Alternative-Splicing Path Configuration
+
+Do not place developer workstation or server paths in AS presets. Accept user paths through CLI flags or their environment-variable equivalents:
+
+- `--embedding-h5ad` or `DOLPHIN_AS_EMBEDDING_H5AD`
+- `--metadata-path` or `DOLPHIN_AS_METADATA_PATH`
+- `--bam-root` or `DOLPHIN_AS_BAM_ROOT`
+- `--junction-root` or `DOLPHIN_AS_JUNCTION_ROOT`
+- `--gtf-path` or `DOLPHIN_AS_GTF_PATH`
+- `--gffutils-db` or `DOLPHIN_AS_GFFUTILS_DB`
+- `--genome-sizes-path` or `DOLPHIN_AS_GENOME_SIZES_PATH`
+- `--fasta-path` or `DOLPHIN_AS_FASTA_PATH`
+- `--star-index-dir` or `DOLPHIN_AS_STAR_INDEX_DIR`
+- `--star-binary`, `--samtools-binary`, and `--bedtools-bin-dir`, or their documented environment variables/active `PATH`
+- `--results-root`, `--logs-root`, `--prepared-inputs-root`, and `--outrigger-work-root`, or their documented environment variables
+
+The BAM route requires a standard-GTF STAR index. The junction route does not require a STAR index. Both routes retain the same downstream Outrigger event/index/PSI semantics.
+
 ## Running And Debugging
 
 For planned pipeline execution:

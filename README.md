@@ -2,6 +2,8 @@
 
 DOLPHIN: Deep Exon-level Graph Neural Network for Single-cell Representation Learning and Alternative Splicing
 
+<img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">
+
 ## DOLPHIN v2: Clean Pipeline and Codex Skill
 
 > [!IMPORTANT]
@@ -16,7 +18,7 @@ DOLPHIN: Deep Exon-level Graph Neural Network for Single-cell Representation Lea
 | Original DOLPHIN v1 | [`legacy-v1`](https://github.com/mcgilldinglab/DOLPHIN/tree/legacy-v1) / `v1.0.0-legacy` | Preserved | Permanent snapshot of the original repository before v2 |
 | Zebrafish v1 fix | [`fix-zebrafish-gene-id-order`](https://github.com/mcgilldinglab/DOLPHIN/tree/fix-zebrafish-gene-id-order) | Preserved compatibility branch | Adds non-numeric gene-ID support to v1; the fix is also included in v2 |
 
-The original README continues below this v2 section without replacing its existing content. Historical releases remain reproducible through their preserved branch or tag.
+The original README continues below this v2 section without replacing its existing content. 
 
 ### What v2 provides
 
@@ -27,7 +29,7 @@ DOLPHIN v2 organizes the validated workflow into four connected sections:
 - **Alternative splicing:** both BAM-level and direct-junction aggregation for full-length and 10x data, followed by the unchanged Outrigger event/index/PSI workflow.
 - **EDEG and JDEG:** the historical one-cluster-vs-rest MAST workflow, followed by exon-to-gene or junction-to-gene evidence aggregation.
 
-Full-length and 10x data follow the same high-level scientific workflow. Modality-specific code only adapts their input formats. Smoke tests and complete runs use the same implementation, with cell subsetting used only to reduce test size.
+Full-length and 10x data follow the same high-level scientific workflow. Modality-specific code only adapts their input formats. 
 
 ### Choose how to run v2
 
@@ -84,7 +86,7 @@ Use this option when you want Codex to inspect inputs, ask about scientifically 
    workflows from the finalized DOLPHIN outputs.
    ```
 
-Codex should confirm the full-length versus 10x modality, the alternative-splicing route, durable and scratch locations, resource-intensive runs, and any operation that could overwrite results. It must not change Outrigger semantics or the historical EDEG/JDEG statistical design without explicit approval.
+Codex should confirm the full-length versus 10x, the alternative-splicing route, durable and scratch locations, resource-intensive runs, and any operation that could overwrite results. It must not change Outrigger semantics or the historical EDEG/JDEG statistical design without explicit approval.
 
 #### Option B: Direct command-line execution
 
@@ -119,15 +121,13 @@ External tools such as STAR, featureCounts/Subread, samtools, bedtools, R/Seurat
 | Alternative splicing | `PSI.h5ad`, `PSI_random.h5ad`, `PSI_DAS.h5ad` | PSI matrices and differential AS results |
 | EDEG/JDEG | per-cluster MAST tables and gene-level summaries | Historical one-vs-rest differential analysis |
 
-Temporary files may be placed on fast local scratch storage when available, but durable outputs remain under a user-selected project directory. The pipeline does not require a specific server path such as `/tmp` or `/mnt/md0`.
+Temporary files may be placed on fast local scratch storage when available, but durable outputs remain under a user-selected project directory. 
 
 ---
 
 ## Original DOLPHIN README
 
 Full documentation and tutorials are available at [DOLPHIN Docs](https://dolphin-sc.readthedocs.io/en/latest/).
-
-<img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">
 
 ## Overview
 <img title="DOLPHIN Overview" alt="Alt text" src="Overview_DOLPHIN.png">

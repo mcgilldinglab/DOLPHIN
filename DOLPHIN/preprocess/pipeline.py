@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -60,6 +61,17 @@ def _quote(arg: str) -> str:
 
 def _shell_join(argv: Iterable[str]) -> str:
     return " ".join(_quote(arg) for arg in argv)
+
+
+def _shell_executable() -> str:
+    configured = os.environ.get("DOLPHIN_PREPROCESS_SHELL")
+    resolved = shutil.which(configured) if configured else None
+    resolved = resolved or shutil.which("bash") or shutil.which("sh")
+    if resolved is None:
+        raise RuntimeError(
+            "No shell executable found. Set DOLPHIN_PREPROCESS_SHELL or add bash/sh to PATH."
+        )
+    return resolved
 
 
 def _ensure_directory(path: str) -> str:
@@ -2324,7 +2336,7 @@ def _execute_preprocess_stage(
             completed = subprocess.run(
                 stage["command"],
                 shell=True,
-                executable="/bin/bash",
+                executable=_shell_executable(),
                 cwd=project_root,
                 env=env,
                 stdout=handle,
