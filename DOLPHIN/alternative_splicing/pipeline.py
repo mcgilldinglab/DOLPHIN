@@ -12,36 +12,25 @@ from pathlib import Path
 
 
 MODULE_DIR = Path(__file__).resolve().parent
-PACKAGE_ROOT = MODULE_DIR.parents[2]
-ROOT = Path(os.environ.get("DOLPHIN_AS_ROOT", PACKAGE_ROOT / "alternative_splicing_runs"))
-VENDORED_SITE = Path(
+ROOT = Path(
     os.environ.get(
-        "DOLPHIN_AS_VENDOR_SITE",
-        "/mnt/md0/kailu/DOLPHIN_codex/runtime_envs/as_site_manual",
+        "DOLPHIN_AS_ROOT",
+        Path.cwd() / "dolphin_alternative_splicing_runs",
     )
-)
+).expanduser()
+_VENDORED_SITE_VALUE = os.environ.get("DOLPHIN_AS_VENDOR_SITE")
+VENDORED_SITE = Path(_VENDORED_SITE_VALUE).expanduser() if _VENDORED_SITE_VALUE else None
 if str(MODULE_DIR) not in sys.path:
     sys.path.insert(0, str(MODULE_DIR))
-
-from find_cell_neighbor import run_find_neighbor
-from get_single_bam_reads import run_reads_count
-from process_junction_aggregation import run_junction_aggregation
-from process_reads_aggregation import run_reads_aggregation
-from convert_psi_to_h5ad import run_convert_psi
-from convert_random_psi import run_psi_random
-from generate_differential_as import run_differential_as
-
 
 def _cpu_count():
     return os.cpu_count() or 1
 
 
-def _default_tool(env_name, bundled_path, tool_name):
+def _default_tool(env_name, tool_name):
     env_value = os.environ.get(env_name)
     if env_value:
         return env_value
-    if bundled_path and os.path.exists(bundled_path):
-        return bundled_path
     resolved = shutil.which(tool_name)
     if resolved:
         return resolved
@@ -95,7 +84,7 @@ def _default_outrigger_pythonpath():
         str(MODULE_DIR / "runtime_support" / "pandas_compat"),
         str(MODULE_DIR / "runtime_support" / "outrigger_patched"),
     ]
-    if VENDORED_SITE.exists():
+    if VENDORED_SITE is not None:
         parts.append(str(VENDORED_SITE))
     extra = os.environ.get("DOLPHIN_AS_EXTRA_PYTHONPATH")
     if extra:
@@ -104,30 +93,23 @@ def _default_outrigger_pythonpath():
 
 
 DEFAULTS = {
-    "embedding_h5ad": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/full_length_dolphin_model_v2/data/DOLPHIN_Z.h5ad",
-    "metadata_path": "/mnt/md0/kailu/DOLPHIN_codex/data_example/flashseq/metadata.csv",
-    "bam_root": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/full_length_flashseq_clean_v1/outputs/03_exon_star",
-    "junction_root": "/mnt/md0/kailu/DOLPHIN_codex/execution_runs/full_length_flashseq_clean_v1/outputs/03_exon_star",
+    "embedding_h5ad": os.environ.get("DOLPHIN_AS_EMBEDDING_H5AD"),
+    "metadata_path": os.environ.get("DOLPHIN_AS_METADATA_PATH"),
+    "bam_root": os.environ.get("DOLPHIN_AS_BAM_ROOT"),
+    "junction_root": os.environ.get("DOLPHIN_AS_JUNCTION_ROOT"),
     "bam_file_extension": ".Aligned.sortedByCoord.out.bam",
     "junction_file_extension": ".SJ.out.tab",
     "results_root": _default_results_root(),
     "logs_root": _default_logs_root(),
-    "star_binary": _default_tool(
-        "DOLPHIN_AS_STAR",
-        "/mnt/md0/kailu/DOLPHIN_codex/runtime_envs/dolphin_preprocess_env/bin/STAR",
-        "STAR",
-    ),
-    "samtools_binary": _default_tool(
-        "DOLPHIN_AS_SAMTOOLS",
-        "/mnt/md0/kailu/DOLPHIN_codex/runtime_envs/dolphin_preprocess_env/bin/samtools",
-        "samtools",
-    ),
-    "gtf_path": "/mnt/md0/kailu/microbiota_fungi_codex/04_human_gtf_star_index/inputs/Homo_sapiens.GRCh38.107.gtf",
-    "gffutils_db": "/mnt/md0/kailu/DOLPHIN_codex/AS_run/reference_cache/Homo_sapiens.GRCh38.107.gtf.db",
-    "genome_sizes_path": "/mnt/md0/kailu/DOLPHIN_codex/AS_run/reference_cache/grch38_ensembl107.chrom.sizes",
-    "fasta_path": "/mnt/md0/kailu/DOLPHIN_codex/reference_inputs/grch38_release107/Homo_sapiens.GRCh38.dna_sm.primary_assembly.fa",
-    "star_index_dir": "/mnt/md0/kailu/microbiota_fungi_codex/04_human_gtf_star_index/outputs/star_index_ensembl107",
-    "out_name": "full_length_flashseq",
+    "star_binary": _default_tool("DOLPHIN_AS_STAR", "STAR"),
+    "samtools_binary": _default_tool("DOLPHIN_AS_SAMTOOLS", "samtools"),
+    "bedtools_bin_dir": os.environ.get("DOLPHIN_AS_BEDTOOLS_BIN"),
+    "gtf_path": os.environ.get("DOLPHIN_AS_GTF_PATH"),
+    "gffutils_db": os.environ.get("DOLPHIN_AS_GFFUTILS_DB"),
+    "genome_sizes_path": os.environ.get("DOLPHIN_AS_GENOME_SIZES_PATH"),
+    "fasta_path": os.environ.get("DOLPHIN_AS_FASTA_PATH"),
+    "star_index_dir": os.environ.get("DOLPHIN_AS_STAR_INDEX_DIR"),
+    "out_name": os.environ.get("DOLPHIN_AS_OUT_NAME", "dolphin_as"),
     "neighbor_k": 10,
     "cluster_name": "celltype1",
     "min_event_cells": 10,
@@ -137,13 +119,46 @@ DEFAULTS = {
     "aggregation_workers": _default_aggregation_workers(),
     "aggregation_mode": "bam",
     "prepared_inputs_root": _default_prepared_inputs_root(),
-    "rg_bam_path": None,
+    "rg_bam_path": os.environ.get("DOLPHIN_AS_RG_BAM_PATH"),
     "metadata_normalization": "none",
     "outrigger_python": _default_outrigger_python(),
     "outrigger_pythonpath": _default_outrigger_pythonpath(),
     "outrigger_work_root": _default_outrigger_work_root(),
     "use_gffutils_db": False,
 }
+
+
+class ASConfigurationError(ValueError):
+    """Raised when required user-provided AS inputs are missing or invalid."""
+
+
+def _load_pipeline_functions():
+    if __package__:
+        from .convert_psi_to_h5ad import run_convert_psi
+        from .convert_random_psi import run_psi_random
+        from .find_cell_neighbor import run_find_neighbor
+        from .generate_differential_as import run_differential_as
+        from .get_single_bam_reads import run_reads_count
+        from .process_junction_aggregation import run_junction_aggregation
+        from .process_reads_aggregation import run_reads_aggregation
+    else:
+        from convert_psi_to_h5ad import run_convert_psi
+        from convert_random_psi import run_psi_random
+        from find_cell_neighbor import run_find_neighbor
+        from generate_differential_as import run_differential_as
+        from get_single_bam_reads import run_reads_count
+        from process_junction_aggregation import run_junction_aggregation
+        from process_reads_aggregation import run_reads_aggregation
+
+    return (
+        run_find_neighbor,
+        run_reads_count,
+        run_junction_aggregation,
+        run_reads_aggregation,
+        run_convert_psi,
+        run_psi_random,
+        run_differential_as,
+    )
 
 
 def _run(cmd, *, cwd=None, env=None):
@@ -429,7 +444,166 @@ def _collect_required_cells_from_neighbors(neighbor_csv, main_cells):
     return sorted(required)
 
 
+def _resolve_executable(value, flag_name):
+    if not value:
+        raise ASConfigurationError(f"{flag_name} is required.")
+
+    expanded = os.path.expanduser(str(value))
+    resolved = shutil.which(expanded)
+    if resolved is None:
+        raise ASConfigurationError(
+            f"Executable for {flag_name} was not found: {value}. "
+            "Provide an executable path or make it available on PATH."
+        )
+    return str(Path(resolved).resolve())
+
+
+def validate_runtime_config(args):
+    """Validate and normalize user-configured paths before starting a run."""
+    path_specs = {
+        "embedding_h5ad": ("--embedding-h5ad", "DOLPHIN_AS_EMBEDDING_H5AD", "file"),
+        "metadata_path": ("--metadata-path", "DOLPHIN_AS_METADATA_PATH", "file"),
+        "bam_root": ("--bam-root", "DOLPHIN_AS_BAM_ROOT", "directory"),
+        "junction_root": ("--junction-root", "DOLPHIN_AS_JUNCTION_ROOT", "directory"),
+        "gtf_path": ("--gtf-path", "DOLPHIN_AS_GTF_PATH", "file"),
+        "gffutils_db": ("--gffutils-db", "DOLPHIN_AS_GFFUTILS_DB", "file"),
+        "genome_sizes_path": (
+            "--genome-sizes-path",
+            "DOLPHIN_AS_GENOME_SIZES_PATH",
+            "file",
+        ),
+        "fasta_path": ("--fasta-path", "DOLPHIN_AS_FASTA_PATH", "file"),
+        "star_index_dir": (
+            "--star-index-dir",
+            "DOLPHIN_AS_STAR_INDEX_DIR",
+            "directory",
+        ),
+    }
+    required_paths = {
+        "embedding_h5ad",
+        "metadata_path",
+        "bam_root",
+        "junction_root",
+        "genome_sizes_path",
+        "fasta_path",
+    }
+    if args.aggregation_mode == "bam":
+        required_paths.add("star_index_dir")
+    if args.aggregation_mode == "junction" or not args.use_gffutils_db:
+        required_paths.add("gtf_path")
+    if args.use_gffutils_db:
+        required_paths.add("gffutils_db")
+
+    missing = []
+    for attr_name in sorted(required_paths):
+        if not getattr(args, attr_name, None):
+            flag_name, env_name, _ = path_specs[attr_name]
+            missing.append(f"{flag_name} (or {env_name})")
+    if missing:
+        raise ASConfigurationError(
+            "Missing required alternative-splicing inputs: " + ", ".join(missing)
+        )
+
+    problems = []
+    for attr_name in sorted(required_paths):
+        flag_name, _, path_kind = path_specs[attr_name]
+        path = Path(getattr(args, attr_name)).expanduser()
+        valid = path.is_file() if path_kind == "file" else path.is_dir()
+        if not valid:
+            problems.append(f"{flag_name} is not an existing {path_kind}: {path}")
+            continue
+        setattr(args, attr_name, str(path.resolve()))
+
+    if args.rg_bam_path:
+        rg_bam_path = Path(args.rg_bam_path).expanduser()
+        if not rg_bam_path.is_file():
+            problems.append(f"--rg-bam-path is not an existing file: {rg_bam_path}")
+        else:
+            args.rg_bam_path = str(rg_bam_path.resolve())
+
+    for attr_name in (
+        "results_root",
+        "logs_root",
+        "prepared_inputs_root",
+        "outrigger_work_root",
+    ):
+        value = getattr(args, attr_name, None)
+        if not value:
+            problems.append(f"--{attr_name.replace('_', '-')} cannot be empty")
+        else:
+            setattr(args, attr_name, str(Path(value).expanduser().resolve()))
+
+    executable_specs = [
+        ("samtools_binary", "--samtools-binary"),
+        ("outrigger_python", "--outrigger-python"),
+    ]
+    if args.aggregation_mode == "bam":
+        executable_specs.append(("star_binary", "--star-binary"))
+    for attr_name, flag_name in executable_specs:
+        try:
+            setattr(args, attr_name, _resolve_executable(getattr(args, attr_name), flag_name))
+        except ASConfigurationError as exc:
+            problems.append(str(exc))
+
+    if VENDORED_SITE is not None and not VENDORED_SITE.is_dir():
+        problems.append(
+            "DOLPHIN_AS_VENDOR_SITE is not an existing directory: "
+            f"{VENDORED_SITE}"
+        )
+    if not args.outrigger_pythonpath:
+        problems.append("--outrigger-pythonpath cannot be empty")
+    if not str(args.out_name).strip():
+        problems.append("--out-name cannot be empty")
+
+    if args.bedtools_bin_dir:
+        bedtools_bin_dir = Path(args.bedtools_bin_dir).expanduser()
+        bedtools_binary = shutil.which("bedtools", path=str(bedtools_bin_dir))
+        if not bedtools_bin_dir.is_dir() or bedtools_binary is None:
+            problems.append(
+                "--bedtools-bin-dir must be a directory containing the bedtools executable: "
+                f"{bedtools_bin_dir}"
+            )
+        else:
+            args.bedtools_bin_dir = str(bedtools_bin_dir.resolve())
+    else:
+        bedtools_binary = shutil.which("bedtools")
+        if bedtools_binary is None:
+            problems.append(
+                "bedtools was not found on PATH; provide --bedtools-bin-dir or "
+                "DOLPHIN_AS_BEDTOOLS_BIN"
+            )
+        else:
+            args.bedtools_bin_dir = str(Path(bedtools_binary).resolve().parent)
+
+    for attr_name in (
+        "neighbor_k",
+        "star_threads",
+        "star_jobs",
+        "read_count_workers",
+        "aggregation_workers",
+        "min_event_cells",
+    ):
+        if getattr(args, attr_name) < 1:
+            problems.append(f"--{attr_name.replace('_', '-')} must be at least 1")
+    if args.max_cells is not None and args.max_cells < 1:
+        problems.append("--max-cells must be at least 1")
+
+    if problems:
+        raise ASConfigurationError("Invalid AS configuration:\n- " + "\n- ".join(problems))
+    return args
+
+
 def run_pipeline(args):
+    args = validate_runtime_config(args)
+    (
+        run_find_neighbor,
+        run_reads_count,
+        run_junction_aggregation,
+        run_reads_aggregation,
+        run_convert_psi,
+        run_psi_random,
+        run_differential_as,
+    ) = _load_pipeline_functions()
     root = Path(args.results_root) / args.out_name
     logs_dir = Path(args.logs_root)
     root.mkdir(parents=True, exist_ok=True)
@@ -634,6 +808,8 @@ def run_pipeline(args):
 
     env = os.environ.copy()
     env["PYTHONPATH"] = args.outrigger_pythonpath + os.pathsep + env.get("PYTHONPATH", "")
+    env["DOLPHIN_AS_BEDTOOLS_BIN"] = args.bedtools_bin_dir
+    env["PATH"] = args.bedtools_bin_dir + os.pathsep + env.get("PATH", "")
 
     if not outrigger_index_complete:
         t0 = time.time()
@@ -775,21 +951,78 @@ def build_parser(default_overrides=None):
         defaults.update(default_overrides)
 
     parser = argparse.ArgumentParser(description="Run the finalized DOLPHIN alternative splicing pipeline.")
-    parser.add_argument("--embedding-h5ad", default=defaults["embedding_h5ad"])
-    parser.add_argument("--metadata-path", default=defaults["metadata_path"])
-    parser.add_argument("--bam-root", default=defaults["bam_root"])
-    parser.add_argument("--junction-root", default=defaults["junction_root"])
+    parser.add_argument(
+        "--embedding-h5ad",
+        default=defaults["embedding_h5ad"],
+        help="DOLPHIN embedding H5AD (or DOLPHIN_AS_EMBEDDING_H5AD).",
+    )
+    parser.add_argument(
+        "--metadata-path",
+        default=defaults["metadata_path"],
+        help="Cell metadata TSV (or DOLPHIN_AS_METADATA_PATH).",
+    )
+    parser.add_argument(
+        "--bam-root",
+        default=defaults["bam_root"],
+        help="Per-cell BAM input directory (or DOLPHIN_AS_BAM_ROOT).",
+    )
+    parser.add_argument(
+        "--junction-root",
+        default=defaults["junction_root"],
+        help="Per-cell junction input directory (or DOLPHIN_AS_JUNCTION_ROOT).",
+    )
     parser.add_argument("--bam-file-extension", default=defaults["bam_file_extension"])
     parser.add_argument("--junction-file-extension", default=defaults["junction_file_extension"])
-    parser.add_argument("--results-root", default=defaults["results_root"])
-    parser.add_argument("--logs-root", default=defaults["logs_root"])
-    parser.add_argument("--star-binary", default=defaults["star_binary"])
-    parser.add_argument("--samtools-binary", default=defaults["samtools_binary"])
-    parser.add_argument("--gtf-path", default=defaults["gtf_path"])
-    parser.add_argument("--gffutils-db", default=defaults["gffutils_db"])
-    parser.add_argument("--genome-sizes-path", default=defaults["genome_sizes_path"])
-    parser.add_argument("--fasta-path", default=defaults["fasta_path"])
-    parser.add_argument("--star-index-dir", default=defaults["star_index_dir"])
+    parser.add_argument(
+        "--results-root",
+        default=defaults["results_root"],
+        help="Durable AS output root (or DOLPHIN_AS_RESULTS_ROOT).",
+    )
+    parser.add_argument(
+        "--logs-root",
+        default=defaults["logs_root"],
+        help="Status and timing log root (or DOLPHIN_AS_LOGS_ROOT).",
+    )
+    parser.add_argument(
+        "--star-binary",
+        default=defaults["star_binary"],
+        help="STAR executable or command on PATH (or DOLPHIN_AS_STAR).",
+    )
+    parser.add_argument(
+        "--samtools-binary",
+        default=defaults["samtools_binary"],
+        help="samtools executable or command on PATH (or DOLPHIN_AS_SAMTOOLS).",
+    )
+    parser.add_argument(
+        "--bedtools-bin-dir",
+        default=defaults["bedtools_bin_dir"],
+        help="Directory containing bedtools (or DOLPHIN_AS_BEDTOOLS_BIN).",
+    )
+    parser.add_argument(
+        "--gtf-path",
+        default=defaults["gtf_path"],
+        help="Standard annotation GTF (or DOLPHIN_AS_GTF_PATH).",
+    )
+    parser.add_argument(
+        "--gffutils-db",
+        default=defaults["gffutils_db"],
+        help="Optional reusable gffutils DB (or DOLPHIN_AS_GFFUTILS_DB).",
+    )
+    parser.add_argument(
+        "--genome-sizes-path",
+        default=defaults["genome_sizes_path"],
+        help="Chromosome sizes file (or DOLPHIN_AS_GENOME_SIZES_PATH).",
+    )
+    parser.add_argument(
+        "--fasta-path",
+        default=defaults["fasta_path"],
+        help="Reference genome FASTA (or DOLPHIN_AS_FASTA_PATH).",
+    )
+    parser.add_argument(
+        "--star-index-dir",
+        default=defaults["star_index_dir"],
+        help="Standard-GTF STAR index required by the BAM route (or DOLPHIN_AS_STAR_INDEX_DIR).",
+    )
     parser.add_argument("--out-name", default=defaults["out_name"])
     parser.add_argument("--neighbor-k", type=int, default=defaults["neighbor_k"])
     parser.add_argument("--cluster-name", default=defaults["cluster_name"])
@@ -799,24 +1032,54 @@ def build_parser(default_overrides=None):
     parser.add_argument("--read-count-workers", type=int, default=defaults["read_count_workers"])
     parser.add_argument("--aggregation-workers", type=int, default=defaults["aggregation_workers"])
     parser.add_argument("--aggregation-mode", choices=["bam", "junction"], default=defaults["aggregation_mode"])
-    parser.add_argument("--prepared-inputs-root", default=defaults["prepared_inputs_root"])
-    parser.add_argument("--rg-bam-path", default=defaults["rg_bam_path"])
+    parser.add_argument(
+        "--prepared-inputs-root",
+        default=defaults["prepared_inputs_root"],
+        help="Scratch root for optional RG BAM splitting (or DOLPHIN_AS_PREPARED_INPUTS_ROOT).",
+    )
+    parser.add_argument(
+        "--rg-bam-path",
+        default=defaults["rg_bam_path"],
+        help="Optional 10x RG-tagged BAM to split (or DOLPHIN_AS_RG_BAM_PATH).",
+    )
     parser.add_argument(
         "--metadata-normalization",
         choices=["none", "tenx_barcode"],
         default=defaults["metadata_normalization"],
     )
-    parser.add_argument("--outrigger-python", default=defaults["outrigger_python"])
-    parser.add_argument("--outrigger-pythonpath", default=defaults["outrigger_pythonpath"])
-    parser.add_argument("--outrigger-work-root", default=defaults["outrigger_work_root"])
-    parser.add_argument("--use-gffutils-db", action="store_true", default=defaults["use_gffutils_db"])
+    parser.add_argument(
+        "--outrigger-python",
+        default=defaults["outrigger_python"],
+        help="Python executable containing Outrigger dependencies (or DOLPHIN_AS_OUTRIGGER_PYTHON).",
+    )
+    parser.add_argument(
+        "--outrigger-pythonpath",
+        default=defaults["outrigger_pythonpath"],
+        help="Outrigger compatibility PYTHONPATH assembled from the package and user environment.",
+    )
+    parser.add_argument(
+        "--outrigger-work-root",
+        default=defaults["outrigger_work_root"],
+        help="Fast Outrigger work root (or DOLPHIN_AS_OUTRIGGER_WORK_ROOT).",
+    )
+    parser.add_argument(
+        "--use-gffutils-db",
+        action="store_true",
+        default=defaults["use_gffutils_db"],
+        help="Use --gffutils-db instead of building the Outrigger index directly from --gtf-path.",
+    )
     parser.add_argument("--seed-num", type=int, default=0)
     parser.add_argument("--max-cells", type=int)
     return parser
 
 
 def main(default_overrides=None):
-    run_pipeline(build_parser(default_overrides=default_overrides).parse_args())
+    parser = build_parser(default_overrides=default_overrides)
+    args = parser.parse_args()
+    try:
+        run_pipeline(args)
+    except ASConfigurationError as exc:
+        parser.error(str(exc))
 
 
 if __name__ == "__main__":
