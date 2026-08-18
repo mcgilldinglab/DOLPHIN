@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
+from DOLPHIN._gene_order import map_gene_orders
+
 from ._anndata_compat import enable_nullable_string_writes, write_h5ad_preserve_strings
 
 
@@ -31,10 +33,6 @@ def _contiguous_slices(values):
     return slices
 
 
-def _gene_numeric_order(gene_id: str) -> int:
-    return int(str(gene_id)[4:])
-
-
 def _feature_exon_order(var_name: str) -> int:
     return int(str(var_name).rsplit("-", 1)[-1])
 
@@ -45,7 +43,10 @@ def _build_exon_keep_lookup(adata_fea_gtf):
     feature_var = feature_var.copy()
     feature_var["var_name"] = list(adata_fea_gtf.var_names)
     feature_var["orig_pos"] = np.arange(feature_var.shape[0])
-    feature_var["gene_order"] = feature_var["gene_id"].map(_gene_numeric_order)
+    feature_var["gene_order"] = map_gene_orders(
+        feature_var["gene_id"],
+        feature_var["gene_id"],
+    )
     feature_var["exon_order"] = feature_var["var_name"].map(_feature_exon_order)
     feature_var = feature_var.sort_values(
         by=["gene_order", "exon_order"],
