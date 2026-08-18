@@ -125,7 +125,7 @@ Temporary files may be placed on fast local scratch storage when available, but 
 
 ---
 
-## Original DOLPHIN README
+## DOLPHIN V1
 
 Full documentation and tutorials are available at [DOLPHIN Docs](https://dolphin-sc.readthedocs.io/en/latest/).
 
