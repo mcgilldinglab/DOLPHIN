@@ -113,6 +113,9 @@ DEFAULTS = {
     "neighbor_k": 10,
     "cluster_name": "celltype1",
     "min_event_cells": 10,
+    "das_group_column": os.environ.get("DOLPHIN_AS_DAS_GROUP_COLUMN", "Condition"),
+    "das_group1": os.environ.get("DOLPHIN_AS_DAS_GROUP1"),
+    "das_group2": os.environ.get("DOLPHIN_AS_DAS_GROUP2"),
     "star_threads": _default_star_threads(),
     "star_jobs": _default_star_jobs(),
     "read_count_workers": _default_read_count_workers(),
@@ -904,7 +907,8 @@ def run_pipeline(args):
 
     # Step 8: differential AS
     psi_das_h5ad = alt_splice_dir / f"{args.out_name}_PSI_DAS.h5ad"
-    if not psi_das_h5ad.exists():
+    das_results_csv = alt_splice_dir / f"{args.out_name}_DAS.csv"
+    if not psi_das_h5ad.exists() or not das_results_csv.exists():
         t0 = time.time()
         _write_status(status_path, {"current_step": "differential_as", "started_at": started})
         run_differential_as(
@@ -913,6 +917,9 @@ def run_pipeline(args):
             cluster_name=args.cluster_name,
             out_directory=str(root),
             n_cell=args.min_event_cells,
+            group_column=args.das_group_column,
+            group1=args.das_group1,
+            group2=args.das_group2,
         )
         timings["differential_as"] = time.time() - t0
 
@@ -938,6 +945,7 @@ def run_pipeline(args):
             "psi_h5ad": str(psi_h5ad),
             "psi_random_h5ad": str(psi_random_h5ad),
             "psi_das_h5ad": str(psi_das_h5ad),
+            "das_results_csv": str(das_results_csv),
         },
     }
     summary_path.write_text(json.dumps(summary, indent=2))
@@ -1027,6 +1035,24 @@ def build_parser(default_overrides=None):
     parser.add_argument("--neighbor-k", type=int, default=defaults["neighbor_k"])
     parser.add_argument("--cluster-name", default=defaults["cluster_name"])
     parser.add_argument("--min-event-cells", type=int, default=defaults["min_event_cells"])
+    parser.add_argument(
+        "--das-group-column",
+        default=defaults["das_group_column"],
+        help=(
+            "Metadata column defining the two biological groups for differential AS "
+            "(or DOLPHIN_AS_DAS_GROUP_COLUMN)."
+        ),
+    )
+    parser.add_argument(
+        "--das-group1",
+        default=defaults["das_group1"],
+        help="First DAS group; inferred only when the group column has exactly two values.",
+    )
+    parser.add_argument(
+        "--das-group2",
+        default=defaults["das_group2"],
+        help="Second DAS group; inferred only when the group column has exactly two values.",
+    )
     parser.add_argument("--star-threads", type=int, default=defaults["star_threads"])
     parser.add_argument("--star-jobs", type=int, default=defaults["star_jobs"])
     parser.add_argument("--read-count-workers", type=int, default=defaults["read_count_workers"])

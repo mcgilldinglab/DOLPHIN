@@ -11,6 +11,8 @@ Important Python dependencies include:
 - `anndata`
 - `pandas`
 - `scanpy`
+- `igraph`
+- `leidenalg`
 - `numpy`
 - `scipy`
 - `scikit-learn`
@@ -36,7 +38,7 @@ Important R packages for EDEG/JDEG:
 - `dplyr`
 - `patchwork`
 
-Do not assume `/usr/bin/python3` has the required scientific stack. If imports fail with missing `anndata`, `pandas`, `pyro`, or `torch_geometric`, check whether the conda environment from `environment.yaml` is active.
+Do not assume `/usr/bin/python3` has the required scientific stack. If imports fail with missing `anndata`, `pandas`, `pyro`, `torch_geometric`, `igraph`, or `leidenalg`, check whether the conda environment from `environment.yaml` is active.
 
 ## Runtime Roots And Scratch
 
@@ -134,6 +136,7 @@ Alternative splicing:
 - `<out_name>_PSI.h5ad`
 - `<out_name>_PSI_random.h5ad`
 - `<out_name>_PSI_DAS.h5ad`
+- `<out_name>_DAS.csv`
 - `bam_vs_junction_comparison.json` when comparing routes
 
 EDEG/JDEG:

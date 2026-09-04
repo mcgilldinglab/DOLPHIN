@@ -94,6 +94,7 @@ Shared AS logic:
 - aggregate evidence by BAM or junction route
 - run Outrigger `index`, `validate`, and `psi`
 - convert to `PSI.h5ad`, `PSI_random.h5ad`, and `PSI_DAS.h5ad`
+- impute missing PSI per event within cell type, then run two-sided Wilcoxon rank-sum tests between two biological groups with BH correction
 
 BAM route:
 
@@ -138,6 +139,7 @@ AS retained outputs:
 - `alternative_splicing/<out_name>_PSI.h5ad`
 - `alternative_splicing/<out_name>_PSI_random.h5ad`
 - `alternative_splicing/<out_name>_PSI_DAS.h5ad`
+- `alternative_splicing/<out_name>_DAS.csv`
 - `<logs_root>/<out_name>.status.json`
 - `<logs_root>/<out_name>.summary.json`
 

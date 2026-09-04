@@ -10,6 +10,7 @@ def enable_nullable_string_writes():
 
 
 def write_h5ad_preserve_strings(adata, path, **kwargs):
+    enable_nullable_string_writes()
     try:
         from anndata._io.h5ad import write_h5ad
 

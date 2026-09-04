@@ -22,7 +22,7 @@ Shared across full-length and 10x:
 - `convert_random_psi.py`
   - shared randomized PSI export
 - `generate_differential_as.py`
-  - shared DAS filtering/export
+  - event-by-cell-type PSI imputation and Wilcoxon/BH differential testing
 - `build_gffutils_db.py`
   - shared one-time reference DB builder
 - `compare_bam_vs_junction_as.py`
@@ -71,6 +71,7 @@ Common logic for both modalities:
    - `PSI.h5ad`
    - `PSI_random.h5ad`
    - `PSI_DAS.h5ad`
+   - `DAS.csv`
 
 full-length-specific input assumptions:
 
@@ -90,3 +91,5 @@ full-length-specific input assumptions:
 - Outrigger event logic is not changed.
 - Outrigger runtime compatibility and DB-generation behavior are patched only to make the tool stable on modern environments and large runs.
 - `max_overhang` is preserved as `0` in the direct-junction 10x route; it is not inferred from coordinates.
+
+Differential AS uses `--cluster-name` for cell-type-specific, event-specific PSI imputation and `--das-group-column` for the biological comparison. Use `--das-group1` and `--das-group2` when the comparison column contains more than two values.

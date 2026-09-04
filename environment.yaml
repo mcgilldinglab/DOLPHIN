@@ -77,7 +77,9 @@ dependencies:
       - fsspec==2024.10.0
       - h5py==3.12.1
       - idna==3.10
+      - igraph==1.0.0
       - jinja2==3.1.4
+      - leidenalg==0.11.0
       - joblib==1.4.2
       - kiwisolver==1.4.7
       - legacy-api-wrap==1.4

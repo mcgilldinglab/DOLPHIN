@@ -83,6 +83,8 @@ dependencies:
   - docutils==0.18.1
   - fastjsonschema==2.21.1
   - filelock==3.16.1
+  - igraph==1.0.0
+  - leidenalg==0.11.0
   - fonttools==4.55.0
   - frozenlist==1.5.0
   - fsspec==2024.10.0
