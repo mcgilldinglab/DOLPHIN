@@ -15,6 +15,9 @@ Each AS run writes:
 - `alternative_splicing/<out_name>_PSI.h5ad`
 - `alternative_splicing/<out_name>_PSI_random.h5ad`
 - `alternative_splicing/<out_name>_PSI_DAS.h5ad`
+  - PSI matrix after event-specific imputation within each cell type
+- `alternative_splicing/<out_name>_DAS.csv`
+  - event-level delta PSI, two-sided Wilcoxon rank-sum P values, and BH-adjusted P values
 - `<logs_root>/<out_name>.status.json`
 - `<logs_root>/<out_name>.summary.json`
 

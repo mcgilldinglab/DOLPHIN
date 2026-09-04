@@ -23,9 +23,29 @@ class Gra_Encoder(nn.Module):
         self.convs = nn.ModuleList()
         for i, h_dim in enumerate(self.hidden_channels):
             if (i == 0) or (concat == False):
-                self.convs.append(GATConv(in_node_fea, h_dim, heads = nhead, dropout = gat_dropout, concat = concat))
+                self.convs.append(
+                    GATConv(
+                        in_node_fea,
+                        h_dim,
+                        heads=nhead,
+                        dropout=gat_dropout,
+                        concat=concat,
+                        edge_dim=1,
+                        fill_value=0.0,
+                    )
+                )
             else:
-                self.convs.append(GATConv(in_node_fea * nhead, h_dim, heads = nhead, dropout = gat_dropout, concat = concat))
+                self.convs.append(
+                    GATConv(
+                        in_node_fea * nhead,
+                        h_dim,
+                        heads=nhead,
+                        dropout=gat_dropout,
+                        concat=concat,
+                        edge_dim=1,
+                        fill_value=0.0,
+                    )
+                )
             in_node_fea = h_dim
         self.act = nn.ReLU(inplace=True)
         

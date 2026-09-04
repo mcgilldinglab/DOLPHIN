@@ -118,7 +118,7 @@ External tools such as STAR, featureCounts/Subread, samtools, bedtools, R/Seurat
 | Graph generation | pooled feature and adjacency H5AD files | Exon-level graph matrices without retained per-cell graph fragments |
 | Model input | `model_<out_name>.graph.json`, `model_<out_name>.edges.h5` | Lightweight lazy graph store |
 | Model training | `DOLPHIN_Z.h5ad` | Final cell embedding |
-| Alternative splicing | `PSI.h5ad`, `PSI_random.h5ad`, `PSI_DAS.h5ad` | PSI matrices and differential AS results |
+| Alternative splicing | `PSI.h5ad`, `PSI_random.h5ad`, `PSI_DAS.h5ad`, `DAS.csv` | PSI matrices, cell-type/event-imputed PSI, and Wilcoxon/BH differential AS results |
 | EDEG/JDEG | per-cluster MAST tables and gene-level summaries | Historical one-vs-rest differential analysis |
 
 Temporary files may be placed on fast local scratch storage when available, but durable outputs remain under a user-selected project directory. 

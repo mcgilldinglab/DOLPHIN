@@ -26,6 +26,7 @@ Ask the user before proceeding when the answer changes scientific meaning, resou
 
 - The modality is ambiguous: full-length vs 10x.
 - The AS route is ambiguous: BAM aggregation vs direct junction aggregation.
+- Differential AS cell-type and condition columns or the two comparison groups are ambiguous.
 - A run may overwrite, delete, or move existing results.
 - A full run may consume substantial time, GPU, scratch, or disk space.
 - The requested optimization may change output values, event definitions, aggregation semantics, or the final file contract.
@@ -49,6 +50,7 @@ Read [references/environment-and-validation.md](references/environment-and-valid
 - The final efficient graph/model path uses grouped matrices, pooled H5ADs, and lightweight graph-store inputs. Do not make per-cell `*_fea.csv`, `*_adj.csv`, or per-cell graph H5AD fragments the retained public output.
 - Prefer graph-store model input over mandatory large `.pt` serialization. Keep `.pt` only as optional backward compatibility.
 - Alternative splicing keeps both BAM aggregation and direct junction aggregation routes for both full-length and 10x.
+- Differential AS imputes each event from its mean in the same cell type, then compares two biological groups with a two-sided Wilcoxon rank-sum test and BH correction.
 - Do not change Outrigger event/index/PSI semantics. Runtime patches may stabilize execution, but must not redefine what Outrigger calculates.
 - Never fall back to repository-author input, reference, tool, result, or scratch paths. Resolve AS paths from explicit CLI arguments, documented `DOLPHIN_AS_*` environment variables, the active `PATH`, or safe system temporary-directory discovery.
 - EDEG/JDEG public workflow is historical one-cluster-vs-rest MAST only. Do not expose pairwise MAST as the default public route.

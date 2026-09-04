@@ -32,17 +32,100 @@ from .grouped_featurecounts import (
     extract_grouped_cell_junction_counts,
 )
 
-try:
-    from ._count_adj_cython import count_adj_flat as cython_count_adj_flat
-except ImportError:
-    cython_count_adj_flat = None
-
-ENABLE_COUNT_ADJ_CYTHON = os.environ.get("DOLPHIN_ENABLE_COUNT_ADJ_CYTHON", "0") == "1"
-
 
 GROUPED_EXON_COUNTS = None
 GROUPED_JUNCTION_COUNTS = None
 EXON_POSITION_COLUMN = "__dolphin_exon_pos"
+
+
+def _locate_junction_positions(exon_start, exon_end, positions):
+    """Map genomic splice-site coordinates to exon slots."""
+    if positions.size == 0:
+        return np.array([], dtype=np.float64)
+
+    located = np.full(positions.shape, np.nan, dtype=np.float64)
+    before_first = positions < exon_start[0]
+    located[before_first] = -1.0
+
+    candidate = np.searchsorted(exon_start, positions, side="right") - 1
+    valid_candidate = candidate >= 0
+    safe_candidate = np.clip(candidate, 0, len(exon_start) - 1)
+    next_candidate = np.clip(safe_candidate + 1, 0, len(exon_start) - 1)
+
+    inside_exon = valid_candidate & (positions <= exon_end[safe_candidate])
+    located[inside_exon] = safe_candidate[inside_exon].astype(np.float64)
+
+    between_exons = (
+        np.isnan(located)
+        & valid_candidate
+        & (candidate < len(exon_start) - 1)
+        & (positions > exon_end[safe_candidate])
+        & (positions < exon_start[next_candidate])
+    )
+    located[between_exons] = safe_candidate[between_exons].astype(np.float64) + 0.5
+
+    after_last = (
+        np.isnan(located)
+        & (safe_candidate == len(exon_start) - 1)
+        & (positions > exon_end[-1])
+    )
+    located[after_last] = safe_candidate[after_last].astype(np.float64) + 0.5
+    return located
+
+
+def build_raw_adjacency_flat(
+    exon_start,
+    exon_end,
+    exon_count,
+    junction_start,
+    junction_end,
+    junction_weight,
+):
+    """Build the raw junction adjacency matrix for one gene."""
+    exon_start = np.asarray(exon_start, dtype=np.int64)
+    exon_end = np.asarray(exon_end, dtype=np.int64)
+    exon_count = np.asarray(exon_count, dtype=np.float64).reshape(-1)
+    junction_start = np.asarray(junction_start, dtype=np.int64)
+    junction_end = np.asarray(junction_end, dtype=np.int64)
+    junction_weight = np.asarray(junction_weight, dtype=np.float64)
+
+    n_node = exon_start.size
+    adjacency = np.zeros((n_node, n_node), dtype=np.float64)
+    if n_node == 0 or junction_start.size == 0:
+        return adjacency.ravel()
+    if exon_end.size != n_node or exon_count.size != n_node:
+        raise ValueError("Exon starts, ends, and counts must have the same length.")
+    if not (junction_start.size == junction_end.size == junction_weight.size):
+        raise ValueError("Junction starts, ends, and weights must have the same length.")
+
+    start_slots = _locate_junction_positions(exon_start, exon_end, junction_start)
+    end_slots = _locate_junction_positions(exon_start, exon_end, junction_end)
+
+    start_half = np.isfinite(start_slots) & np.isclose(np.mod(start_slots, 1.0), 0.5)
+    end_half = np.isfinite(end_slots) & np.isclose(np.mod(end_slots, 1.0), 0.5)
+    start_slots[start_half] -= 0.5
+    end_slots[end_half] += 0.5
+    end_slots[end_slots >= n_node] = n_node - 1
+
+    finite = np.isfinite(start_slots) & np.isfinite(end_slots)
+    start_idx = np.zeros(start_slots.size, dtype=np.int64)
+    end_idx = np.zeros(end_slots.size, dtype=np.int64)
+    start_idx[finite] = start_slots[finite].astype(np.int64)
+    end_idx[finite] = end_slots[finite].astype(np.int64)
+    valid = (
+        finite
+        & (start_idx >= 0)
+        & (end_idx >= 0)
+        & (start_idx < n_node)
+        & (end_idx < n_node)
+        & (start_idx < end_idx)
+        & (exon_count[start_idx] > 0)
+        & (exon_count[end_idx] > 0)
+        & np.isfinite(junction_weight)
+        & (junction_weight > 0)
+    )
+    np.add.at(adjacency, (start_idx[valid], end_idx[valid]), junction_weight[valid])
+    return adjacency.ravel()
 
 
 def configure_grouped_count_sources(exon_counts=None, junction_counts=None):
@@ -338,258 +421,49 @@ class gene(object):
         if self._current_exon_start is not None and self._current_exon_end is not None:
             exon_start = self._current_exon_start
             exon_end = self._current_exon_end
-            n_node = len(exon_start)
         else:
-            n_node = len(self.exon_table)
             exon_start = self.exon_table["Start"].to_numpy(dtype=np.int64, copy=False)
             exon_end = self.exon_table["End"].to_numpy(dtype=np.int64, copy=False)
+
         junction_start = self.junct_table["Start"].to_numpy(dtype=np.int64, copy=False)
         junction_end = self.junct_table["End"].to_numpy(dtype=np.int64, copy=False)
         junction_weight = self.junct_table["Count"].to_numpy(dtype=np.float64, copy=False)
-        need_debug = (self.ck.upper() == "Y") or (self.show.upper() == "Y")
-
-        if (
-            ENABLE_COUNT_ADJ_CYTHON
-            and (not need_debug)
-            and cython_count_adj_flat is not None
-        ):
-            self.adj_mat = cython_count_adj_flat(
-                np.asarray(exon_start, dtype=np.int64),
-                np.asarray(exon_end, dtype=np.int64),
-                np.asarray(junction_start, dtype=np.int64),
-                np.asarray(junction_end, dtype=np.int64),
-                np.asarray(junction_weight, dtype=np.float64),
-            )
-            return
-
-        def _locate_junction_positions(positions):
-            if positions.size == 0:
-                return np.array([], dtype=np.float64)
-
-            located = np.full(positions.shape, np.nan, dtype=np.float64)
-            before_first = positions < exon_start[0]
-            located[before_first] = -1.0
-
-            candidate = np.searchsorted(exon_start, positions, side="right") - 1
-            valid_candidate = candidate >= 0
-            safe_candidate = np.clip(candidate, 0, n_node - 1)
-            next_candidate = np.clip(safe_candidate + 1, 0, n_node - 1)
-
-            inside_exon = valid_candidate & (positions <= exon_end[safe_candidate])
-            located[inside_exon] = safe_candidate[inside_exon].astype(np.float64)
-
-            between_exons = (
-                np.isnan(located)
-                & valid_candidate
-                & (candidate < n_node - 2)
-                & (positions > exon_end[safe_candidate])
-                & (positions < exon_start[next_candidate])
-            )
-            located[between_exons] = safe_candidate[between_exons].astype(np.float64) + 0.5
-
-            after_last = (
-                np.isnan(located)
-                & (safe_candidate == n_node - 1)
-                & (positions > exon_end[-1])
-            )
-            located[after_last] = safe_candidate[after_last].astype(np.float64) + 0.5
-            return located
-
-        start_slots = _locate_junction_positions(junction_start)
-        end_slots = _locate_junction_positions(junction_end)
-        start_vals = start_slots.copy()
-        end_vals = end_slots.copy()
-        status_vals = np.zeros(start_vals.shape[0], dtype=np.int8)  # 0=normal, 1=delete, 2=added
-
-        delete_mask = (
-            ((start_vals == -1) & (end_vals == -1))
-            | ((start_vals == end_vals) & (start_vals > n_node - 0.5))
+        exon_count = np.asarray(self.feat_mat, dtype=np.float64).reshape(-1)
+        self.adj_mat = build_raw_adjacency_flat(
+            exon_start=exon_start,
+            exon_end=exon_end,
+            exon_count=exon_count,
+            junction_start=junction_start,
+            junction_end=junction_end,
+            junction_weight=junction_weight,
         )
-        status_vals[delete_mask] = 1
 
-        active_mask = status_vals != 1
-        start_half_mask = active_mask & np.isclose(np.mod(start_vals, 1.0), 0.5)
-        start_vals[start_half_mask] = start_vals[start_half_mask] - 0.5
-
-        end_half_mask = active_mask & np.isclose(np.mod(end_vals, 1.0), 0.5)
-        if np.any(end_half_mask):
-            adjusted_end = end_vals[end_half_mask].copy()
-            end_last_mask = (adjusted_end + 0.5).astype(int) >= n_node
-            adjusted_end[end_last_mask] = n_node - 1
-            adjusted_end[~end_last_mask] = adjusted_end[~end_last_mask] + 0.5
-            end_vals[end_half_mask] = adjusted_end
-
-        if n_node > 1 and start_vals.size == 0:
-            final_start = np.arange(0, n_node, dtype=np.float64)
-            final_end = np.arange(1, n_node + 1, dtype=np.float64)
-            final_weight = np.ones(n_node, dtype=np.float64)
-            final_status = np.full(n_node, 2, dtype=np.int8)
-        elif n_node == 1:
-            final_start = np.array([], dtype=np.float64)
-            final_end = np.array([], dtype=np.float64)
-            final_weight = np.array([], dtype=np.float64)
-            final_status = np.array([], dtype=np.int8)
-        else:
-            existing_edges = set(zip(start_vals.tolist(), end_vals.tolist()))
-            added_start = []
-            added_end = []
-            for j in range(1, n_node):
-                if (j - 1, j) not in existing_edges:
-                    added_start.append(float(j - 1))
-                    added_end.append(float(j))
-
-            if added_start:
-                start_work = np.concatenate(
-                    [start_vals, np.asarray(added_start, dtype=np.float64)]
-                )
-                end_work = np.concatenate(
-                    [end_vals, np.asarray(added_end, dtype=np.float64)]
-                )
-                weight_work = np.concatenate(
-                    [
-                        junction_weight,
-                        np.ones(len(added_start), dtype=np.float64),
-                    ]
-                )
-                status_work = np.concatenate(
-                    [
-                        status_vals,
-                        np.full(len(added_start), 2, dtype=np.int8),
-                    ]
-                )
-            else:
-                start_work = start_vals
-                end_work = end_vals
-                weight_work = junction_weight
-                status_work = status_vals
-
-            aggregated_edges = {}
-            for start_value, end_value, weight_value, status_value in zip(
-                start_work.tolist(),
-                end_work.tolist(),
-                weight_work.tolist(),
-                status_work.tolist(),
-            ):
-                edge_key = (start_value, end_value, int(status_value))
-                aggregated_edges[edge_key] = (
-                    aggregated_edges.get(edge_key, 0.0) + float(weight_value)
-                )
-
-            has_added_edge = any(
-                status_value == 2
-                for _, _, status_value in aggregated_edges
-            )
-            final_rows = []
-            for (start_value, end_value, status_value), weight_value in aggregated_edges.items():
-                if status_value == 1:
-                    continue
-                if has_added_edge and status_value != 2:
-                    weight_value = weight_value + 1.0
-                final_rows.append(
-                    (
-                        start_value,
-                        end_value,
-                        weight_value,
-                        status_value,
-                    )
-                )
-
-            if final_rows:
-                final_start = np.asarray(
-                    [row[0] for row in final_rows],
-                    dtype=np.float64,
-                )
-                final_end = np.asarray(
-                    [row[1] for row in final_rows],
-                    dtype=np.float64,
-                )
-                final_weight = np.asarray(
-                    [row[2] for row in final_rows],
-                    dtype=np.float64,
-                )
-                final_status = np.asarray(
-                    [row[3] for row in final_rows],
-                    dtype=np.int8,
-                )
-            else:
-                final_start = np.array([], dtype=np.float64)
-                final_end = np.array([], dtype=np.float64)
-                final_weight = np.array([], dtype=np.float64)
-                final_status = np.array([], dtype=np.int8)
-
-        if need_debug:
-            _df_adj_orig = pd.DataFrame(
+        if (self.ck.upper() == "Y") or (self.show.upper() == "Y"):
+            start_slots = _locate_junction_positions(exon_start, exon_end, junction_start)
+            end_slots = _locate_junction_positions(exon_start, exon_end, junction_end)
+            original_edges = pd.DataFrame(
                 {
                     "edge_orig": np.column_stack([start_slots, end_slots]).tolist(),
-                    "start": start_slots,
-                    "end": end_slots,
                     "weight": junction_weight,
                 }
             )
-            status_labels = np.where(
-                final_status == 2,
-                "A",
-                "",
-            )
-            _df_adj_sum = pd.DataFrame(
+            adjacency = self.adj_mat.reshape(len(exon_start), len(exon_start))
+            kept_start, kept_end = np.nonzero(adjacency)
+            kept_edges = pd.DataFrame(
                 {
-                    "edge_mod": [
-                        "[" + str(start_value) + ", " + str(end_value) + "]"
-                        for start_value, end_value in zip(final_start, final_end)
-                    ],
-                    "start": final_start,
-                    "end": final_end,
-                    "weight": final_weight,
-                    "_status": status_labels,
+                    "start": kept_start,
+                    "end": kept_end,
+                    "weight": adjacency[kept_start, kept_end],
                 }
             )
-
-        # check adj matrix
-        if need_debug:
-            print('Original edge table:')
-            display(_df_adj_orig)
-            print('Modified edge table:')
-            display(_df_adj_sum)
-            print("Number of Node:", n_node)
-            print("Number of Edge:", _df_adj_sum.shape[0])
-        if (self.ck.upper() == "Y"):
-            #the size of the modified adj table show >= exon number 
-            if (_df_adj_sum.shape[0] <n_node-1): 
-                print("=============EDGE NUMBER < NODE NUMBER-1===================")
-            #check if the modified table has and D row didn't delete
-            #check if modified table has node is with x.5
-            for m in range(_df_adj_sum.shape[0]):
-                if (_df_adj_sum["start"][m] % 1 == 0.5) | (_df_adj_sum["end"][m] % 1 == 0.5) | (_df_adj_sum["_status"][m] == "D"):
-                    print("=============SPECIAL CASE NEED MODIFICATION===================")
-                    print("GENEID ====, ", self.id, "Start=====, ", _df_adj_sum["start"][m])
-                #check junction span over more than 1 exon:
-                if _df_adj_sum["end"][m] - _df_adj_sum["start"][m] > 1:
-                    print("=============JUNCTION SPAN===================")
-                    print("GENEID ====, ", self.id, "Start=====, ", _df_adj_sum["start"][m])
-
-
-        #initialize an adjacent matrix 
-        am = np.zeros(shape=(n_node,n_node))
-        if final_start.size:
-            finite_edge_mask = np.isfinite(final_start) & np.isfinite(final_end)
-            start_idx = final_start[finite_edge_mask].astype(int, copy=False)
-            end_idx = final_end[finite_edge_mask].astype(int, copy=False)
-            final_weight = final_weight[finite_edge_mask]
-            valid_edge_mask = (
-                (start_idx >= 0)
-                & (end_idx >= 0)
-                & (start_idx < n_node)
-                & (end_idx < n_node)
-            )
-            am[start_idx[valid_edge_mask], end_idx[valid_edge_mask]] = (
-                final_weight[valid_edge_mask]
-            )
-        
-        self.adj_mat = am.flatten()
-                    
-        if ((self.ck.upper() == "Y") | (self.show.upper() == "Y")):
+            print("Original junction mapping:")
+            display(original_edges)
+            print("Raw adjacency edges:")
+            display(kept_edges)
+            print("Number of Node:", len(exon_start))
+            print("Number of Edge:", kept_edges.shape[0])
             print("ADJ MATRIX:", self.adj_mat)
-    
+
     """
     Show ADJACENCY MATRIX
     """

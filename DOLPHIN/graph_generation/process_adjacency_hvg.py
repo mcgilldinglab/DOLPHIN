@@ -32,12 +32,18 @@ def _contiguous_slices(values):
 def _normalize_within_gene(adata):
     matrix = _to_csr_matrix(adata.X)
     gene_ids = np.asarray(adata.var["gene_id"], dtype=object)
-    var_names = np.asarray(adata.var_names, dtype=object)
+    gene_slices = _contiguous_slices(gene_ids)
+    slice_gene_ids = [gene_id for gene_id, _, _ in gene_slices]
+    if len(slice_gene_ids) != len(set(slice_gene_ids)):
+        raise ValueError(
+            "Adjacency columns for each gene must be contiguous before within-gene "
+            "normalization."
+        )
 
     normalized_blocks = []
-    for _, start, stop in _contiguous_slices(gene_ids):
-        lex_order = np.argsort(var_names[start:stop], kind="stable")
-        block = matrix[:, start:stop][:, lex_order].astype(np.float64).tocsr(copy=True)
+    for _, start, stop in gene_slices:
+        # Preserve the flattened adjacency order recorded in adata.var exactly.
+        block = matrix[:, start:stop].astype(np.float64).tocsr(copy=True)
         gene_sum = np.asarray(block.sum(axis=1)).ravel()
         inv = np.divide(
             1.0,

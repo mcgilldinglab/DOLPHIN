@@ -20,7 +20,8 @@ Four validated routes are preserved:
 - neighbor finding from DOLPHIN embeddings
 - per-cell read counting
 - Outrigger `index`, `validate`, and `psi`
-- conversion to `PSI.h5ad`, `PSI_random.h5ad`, `PSI_DAS.h5ad`
+- conversion to `PSI.h5ad`, `PSI_random.h5ad`, and `PSI_DAS.h5ad`
+- event-level differential AS testing in `<out_name>_DAS.csv`
 - comparison helper for BAM vs junction outputs
 
 ## What Differs
@@ -59,3 +60,13 @@ By modality:
   - `DOLPHIN/alternative_splicing/run_tenx.py`
 - 10x junction:
   - `DOLPHIN/alternative_splicing/run_tenx_junction.py`
+
+## Differential AS Metadata
+
+Differential AS uses two distinct metadata roles:
+
+- `--cluster-name` identifies the cell-type column used to impute each missing PSI value from the mean of that same event in the same cell type.
+- `--das-group-column` identifies the biological condition used for the two-sided Wilcoxon rank-sum test.
+- `--das-group1` and `--das-group2` select the comparison. They may be omitted only when the group column contains exactly two values.
+
+P values are adjusted across tested events with the Benjamini-Hochberg procedure. The imputed matrix is retained as `<out_name>_PSI_DAS.h5ad`; event statistics, `delta_psi`, raw P values, and BH-adjusted P values are retained as `<out_name>_DAS.csv`.
