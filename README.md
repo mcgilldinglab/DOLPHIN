@@ -6,17 +6,6 @@ DOLPHIN: Deep Exon-level Graph Neural Network for Single-cell Representation Lea
 
 ## DOLPHIN v2: Codex Skill
 
-### Versions and preserved releases
-
-| Version | Branch or tag | Status | Purpose |
-| --- | --- | --- | --- |
-| DOLPHIN v2 | [`main`](https://github.com/mcgilldinglab/DOLPHIN/tree/main) | Current release | Finalized efficient pipeline plus the optional Codex skill |
-| DOLPHIN v2 release branch | [`v2-clean-pipeline`](https://github.com/mcgilldinglab/DOLPHIN/tree/v2-clean-pipeline) | Preserved | Source branch retained for the v2 release history |
-| Original DOLPHIN v1 | [`legacy-v1`](https://github.com/mcgilldinglab/DOLPHIN/tree/legacy-v1) / `v1.0.0-legacy` | Preserved | Permanent snapshot of the original repository before v2 |
-| Zebrafish v1 fix | [`fix-zebrafish-gene-id-order`](https://github.com/mcgilldinglab/DOLPHIN/tree/fix-zebrafish-gene-id-order) | Preserved compatibility branch | Adds non-numeric gene-ID support to v1; the fix is also included in v2 |
-
-The original README continues below this v2 section without replacing its existing content. 
-
 ### What v2 provides
 
 DOLPHIN v2 organizes the validated workflow into four connected sections:
