@@ -4,10 +4,7 @@ DOLPHIN: Deep Exon-level Graph Neural Network for Single-cell Representation Lea
 
 <img title="DOLPHIN Logo" alt="Alt text" src="DOLPHIN_logo.png">
 
-## DOLPHIN v2: Clean Pipeline and Codex Skill
-
-> [!IMPORTANT]
-> DOLPHIN v2 is the current release on `main`. The original DOLPHIN release, files, tutorials, and ReadTheDocs site remain available through `legacy-v1` and `v1.0.0-legacy`. Codex is an optional guided interface; the DOLPHIN scientific pipeline can still be run directly from the command line.
+## DOLPHIN v2: Codex Skill
 
 ### Versions and preserved releases
 
